@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GRAPHITE — U.S. Critical Mineral Infographic</title>
+<meta name="description" content="Interactive infographic exploring graphite as a critical mineral: supply chains, production data, life-cycle technologies, and U.S. initiatives.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=JetBrains+Mono:wght@400;700&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════ RESET & VARIABLES ═══════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#e0c35a;--gold-dim:rgba(224,195,90,0.15);--gold-glow:rgba(224,195,90,0.3);
+  --bg:#0a0a0a;--bg2:#111;--bg3:#1a1a1a;--text:#e0e0e0;--text-dim:#888;--text-faint:#555;
+  --red:#c44;--green:#4a4;--orange:#c90;
+  --ff-display:'Playfair Display',Georgia,serif;
+  --ff-mono:'JetBrains Mono','Courier New',monospace;
+  --ff-body:'Source Sans 3','Segoe UI',sans-serif;
+}
+html{scroll-behavior:smooth;background:var(--bg)}
+body{font-family:var(--ff-body);color:var(--text);background:var(--bg);overflow-x:hidden;cursor:default}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:#333;border-radius:3px}
+a{color:var(--gold);text-decoration:none}
+
+/* ═══════════ SCROLL PROGRESS BAR ═══════════ */
+#scroll-progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold),#f5e6a3,var(--gold));width:0%;z-index:9999;transition:width .05s linear;box-shadow:0 0 10px var(--gold-glow)}
+
+/* ═══════════ CURSOR TRAIL ═══════════ */
+.cursor-dot{position:fixed;width:6px;height:6px;background:var(--gold);border-radius:50%;pointer-events:none;z-index:9998;opacity:0;transition:opacity .3s;mix-blend-mode:screen}
+
+/* ═══════════ FILM GRAIN OVERLAY ═══════════ */
+#grain{position:fixed;inset:0;z-index:9990;pointer-events:none;opacity:0.035}
+
+/* ═══════════ GLOBAL ANIMATIONS ═══════════ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+@keyframes glitch{0%,100%{transform:translate(0)}10%{transform:translate(-2px,1px)}20%{transform:translate(2px,-1px)}30%{transform:translate(-1px,2px)}40%{transform:translate(1px,-2px)}50%{transform:translate(-2px,0)}60%{transform:translate(2px,1px)}70%{transform:translate(0,-1px)}80%{transform:translate(-1px,0)}90%{transform:translate(1px,1px)}}
+@keyframes pulseRing{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:.7;transform:scale(1.08)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@keyframes orbit{0%{transform:rotate(0deg) translateX(110px) rotate(0deg)}100%{transform:rotate(360deg) translateX(110px) rotate(-360deg)}}
+@keyframes scanPulse{0%,100%{opacity:.15}50%{opacity:.4}}
+@keyframes typewriter{from{width:0}to{width:100%}}
+@keyframes blinkCaret{0%,100%{border-right-color:var(--gold)}50%{border-right-color:transparent}}
+@keyframes countUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes ripple{0%{transform:scale(0);opacity:.5}100%{transform:scale(4);opacity:0}}
+@keyframes hexSpin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+@keyframes glowPulse{0%,100%{box-shadow:0 0 20px rgba(224,195,90,.05)}50%{box-shadow:0 0 60px rgba(224,195,90,.15)}}
+@keyframes slideInLeft{from{opacity:0;transform:translateX(-50px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideInRight{from{opacity:0;transform:translateX(50px)}to{opacity:1;transform:translateX(0)}}
+
+/* ═══════════ REVEAL SYSTEM ═══════════ */
+.reveal{opacity:0;transform:translateY(40px);transition:opacity .7s cubic-bezier(.4,0,.2,1),transform .7s cubic-bezier(.4,0,.2,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-left{opacity:0;transform:translateX(-50px);transition:opacity .7s,transform .7s}
+.reveal-left.visible{opacity:1;transform:translateX(0)}
+.reveal-right{opacity:0;transform:translateX(50px);transition:opacity .7s,transform .7s}
+.reveal-right.visible{opacity:1;transform:translateX(0)}
+.stagger>*{opacity:0;transform:translateY(20px);transition:opacity .5s,transform .5s}
+.stagger.visible>*{opacity:1;transform:translateY(0)}
+.stagger.visible>*:nth-child(1){transition-delay:.05s}
+.stagger.visible>*:nth-child(2){transition-delay:.1s}
+.stagger.visible>*:nth-child(3){transition-delay:.15s}
+.stagger.visible>*:nth-child(4){transition-delay:.2s}
+.stagger.visible>*:nth-child(5){transition-delay:.25s}
+.stagger.visible>*:nth-child(6){transition-delay:.3s}
+.stagger.visible>*:nth-child(7){transition-delay:.35s}
+.stagger.visible>*:nth-child(8){transition-delay:.4s}
+
+/* ═══════════ LAYOUT ═══════════ */
+.container{max-width:900px;margin:0 auto;padding:0 24px;position:relative;z-index:2}
+.container-sm{max-width:750px;margin:0 auto;padding:0 24px;position:relative;z-index:2}
+
+/* ═══════════ SECTION HEADING ═══════════ */
+.section-heading{text-align:center;margin-bottom:36px}
+.section-heading .bar{width:50px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:0 auto 18px}
+.section-heading h2{font-family:var(--ff-display);font-size:clamp(24px,4vw,38px);font-weight:700;letter-spacing:-.01em;line-height:1.2}
+.section-heading .sub{font-family:var(--ff-mono);font-size:11px;color:var(--text-faint);letter-spacing:.12em;text-transform:uppercase;margin-top:8px}
+
+/* ═══════════ HEX DIVIDER ═══════════ */
+.hex-divider{display:flex;align-items:center;justify-content:center;gap:14px;padding:52px 0}
+.hex-divider .line{flex:1;max-width:130px;height:1px}
+.hex-divider .line-l{background:linear-gradient(90deg,transparent,var(--gold-dim))}
+.hex-divider .line-r{background:linear-gradient(90deg,var(--gold-dim),transparent)}
+
+/* ═══════════ HERO ═══════════ */
+#hero{position:relative;text-align:center;padding:70px 24px 30px;z-index:2}
+.hero-badge{display:inline-block;padding:5px 20px;border:1px solid rgba(224,195,90,.3);border-radius:2px;margin-bottom:20px;animation:fadeUp .5s .1s both}
+.hero-badge span{font-family:var(--ff-mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+#hero h1{font-family:var(--ff-display);font-size:clamp(52px,9vw,100px);font-weight:900;line-height:.9;letter-spacing:-.03em;background:linear-gradient(90deg,#e0c35a,#f5e6a3 25%,#e0c35a 50%,#c9a83a);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:fadeUp .6s .15s both,shimmer 5s 1.5s linear infinite}
+#hero h1:hover{animation:fadeUp .6s .15s both,shimmer 5s 1.5s linear infinite,glitch .3s ease}
+.hero-sub{font-family:var(--ff-mono);font-size:13px;color:#777;letter-spacing:.15em;animation:fadeUp .6s .25s both}
+.hero-hint{font-family:var(--ff-mono);font-size:9px;color:var(--text-faint);letter-spacing:.1em;margin-top:14px;animation:fadeUp .6s .5s both}
+
+/* ═══════════ ELEMENT CARD ═══════════ */
+.element-card-wrap{width:175px;height:210px;perspective:900px;cursor:pointer;margin:28px auto 0;animation:fadeUp .6s .35s both}
+.element-card-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.4,0,.2,1)}
+.element-card-wrap.flipped .element-card-inner{transform:rotateY(180deg)}
+.element-card-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px}
+.card-front{background:linear-gradient(145deg,#1e1e1e,#111);border:2px solid rgba(224,195,90,.3)}
+.card-front .atomic-num{font-family:var(--ff-mono);font-size:11px;color:var(--text-dim);align-self:flex-start}
+.card-front .symbol{font-family:var(--ff-display);font-size:76px;font-weight:900;color:var(--gold);line-height:1}
+.card-front .name{font-family:var(--ff-body);font-size:17px;color:#ccc;font-weight:600}
+.card-front .mass{font-family:var(--ff-mono);font-size:11px;color:#666;margin-top:4px}
+.card-front .flip-hint{font-family:var(--ff-mono);font-size:8px;color:var(--text-faint);margin-top:10px;animation:pulseRing 2s ease infinite}
+.card-back{background:linear-gradient(145deg,#1a1a0d,#111);border:2px solid rgba(224,195,90,.3);transform:rotateY(180deg);align-items:flex-start;gap:7px}
+.card-back .prop{display:flex;justify-content:space-between;width:100%;font-family:var(--ff-mono);font-size:11px}
+.card-back .prop-k{color:var(--text-dim)}
+.card-back .prop-v{color:var(--gold)}
+
+/* ═══════════ ORBITING HEXAGONS ═══════════ */
+.orbit-ring{position:absolute;width:240px;height:240px;top:50%;left:50%;margin-top:-120px;margin-left:-120px;pointer-events:none}
+.orbit-hex{position:absolute;top:50%;left:50%;width:14px;height:14px;margin:-7px;animation:orbit var(--dur) linear infinite}
+.orbit-hex svg{width:14px;height:14px}
+
+/* ═══════════ STATS RIBBON ═══════════ */
+#stats-ribbon{border-top:1px solid rgba(224,195,90,.06);border-bottom:1px solid rgba(224,195,90,.06);background:rgba(224,195,90,.012);padding:24px;position:relative;z-index:2}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));max-width:1000px;margin:0 auto}
+.stat-item{text-align:center;padding:18px 10px}
+.stat-val{font-family:var(--ff-display);font-size:clamp(26px,3.5vw,38px);font-weight:900;color:var(--gold);line-height:1}
+.stat-unit{font-size:.5em;color:#a89040;margin-left:3px}
+.stat-label{font-family:var(--ff-mono);font-size:10px;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase;margin-top:6px}
+
+/* ═══════════ GRAPHENE LAYERS ═══════════ */
+.graphene-wrap{text-align:center}
+.graphene-controls{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:10px}
+.graphene-controls span{font-family:var(--ff-mono);font-size:10px;color:var(--text-dim)}
+input[type=range]{-webkit-appearance:none;background:#333;border-radius:2px;outline:none;height:3px;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;background:var(--gold);border-radius:50%;cursor:pointer}
+
+/* ═══════════ PRODUCTION BARS ═══════════ */
+.prod-row{display:flex;align-items:center;gap:12px;margin-bottom:9px;cursor:pointer;transition:transform .2s}
+.prod-row:hover{transform:translateX(4px)}
+.prod-country{width:95px;text-align:right;font-family:var(--ff-mono);font-size:11px;color:#aaa;flex-shrink:0;transition:color .2s}
+.prod-row:hover .prod-country{color:var(--gold)}
+.prod-track{flex:1;height:26px;background:rgba(255,255,255,.03);border-radius:3px;overflow:hidden}
+.prod-fill{height:100%;border-radius:3px;width:0%;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.prod-val{width:80px;font-family:var(--ff-mono);font-size:11px;color:#777;transition:color .2s}
+.prod-row:hover .prod-val{color:var(--gold)}
+.prod-tooltip{margin-top:16px;padding:14px 18px;background:rgba(224,195,90,.06);border:1px solid rgba(224,195,90,.15);border-radius:4px;font-size:13px;color:#ccc;line-height:1.6;display:none}
+.prod-tooltip.active{display:block;animation:fadeIn .2s ease}
+
+/* ═══════════ DEMAND CHART ═══════════ */
+.demand-chart{max-width:640px;margin:0 auto}
+.demand-legend{display:flex;justify-content:center;gap:24px;margin-top:10px}
+.demand-legend span{font-family:var(--ff-mono);font-size:10px;color:var(--text-dim)}
+.legend-box{display:inline-block;width:12px;height:8px;border-radius:2px;margin-right:6px;vertical-align:middle}
+
+/* ═══════════ SUPPLY CHAIN ═══════════ */
+.chain-nodes{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 4px;max-width:800px;margin:0 auto}
+.chain-node{display:flex;align-items:center;gap:4px}
+.chain-btn{width:80px;height:80px;border-radius:50%;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-dim);transition:all .35s;padding:0}
+.chain-btn.active{border:2px solid var(--gold);background:rgba(224,195,90,.1);color:var(--gold);box-shadow:0 0 30px rgba(224,195,90,.2)}
+.chain-btn.past{border-color:rgba(224,195,90,.3)}
+.chain-btn .icon{font-size:20px}
+.chain-btn .label{font-family:var(--ff-mono);font-size:7.5px;letter-spacing:.04em;text-transform:uppercase;text-align:center;line-height:1.2;margin-top:2px;max-width:62px}
+.chain-connector{width:18px;height:2px;background:rgba(255,255,255,.06);transition:background .3s}
+.chain-connector.past{background:rgba(224,195,90,.4)}
+.chain-detail{margin-top:20px;padding:16px 24px;background:rgba(224,195,90,.04);border:1px solid rgba(224,195,90,.1);border-radius:6px;max-width:600px;margin-left:auto;margin-right:auto;text-align:center;font-size:14px;color:#ccc;line-height:1.7;min-height:60px}
+.chain-detail strong{color:var(--gold)}
+
+/* ═══════════ HEX NAV ═══════════ */
+.hex-nav{display:flex;justify-content:center;flex-wrap:wrap;gap:7px;max-width:820px;margin:0 auto;padding:0 16px}
+.hex-btn{width:112px;height:122px;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:all .3s;flex-shrink:0;padding:0;background:linear-gradient(135deg,#222,#181818);color:#aaa}
+.hex-btn.active{background:linear-gradient(135deg,var(--gold),#c9a83a);color:#0d0d0d;box-shadow:0 0 30px rgba(224,195,90,.2)}
+.hex-btn .h-icon{font-size:22px}
+.hex-btn .h-label{font-family:var(--ff-mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;text-align:center;line-height:1.2;max-width:74px}
+
+/* ═══════════ SLIDER ═══════════ */
+.layer-slider{max-width:500px;margin:14px auto 0;padding:0 16px;display:flex;align-items:center;gap:14px}
+.layer-slider span{font-family:var(--ff-mono);font-size:10px;color:var(--text-dim);letter-spacing:.05em;white-space:nowrap}
+.layer-slider .val{color:var(--gold);width:20px;text-align:right}
+
+/* ═══════════ CONTENT PANEL ═══════════ */
+.content-panels{position:relative;max-width:840px;margin:24px auto 0}
+.content-panel{display:none;animation:fadeUp .5s ease both}
+.content-panel.active{display:block}
+.content-card{background:linear-gradient(145deg,rgba(30,30,30,.92),rgba(18,18,18,.96));border:1px solid rgba(224,195,90,.12);border-radius:8px;padding:32px 36px;backdrop-filter:blur(20px)}
+.content-card h2{font-family:var(--ff-display);font-size:26px;font-weight:700;color:var(--gold);margin-bottom:24px;line-height:1.2}
+.content-card h2 .ico{opacity:.5;margin-right:10px}
+.content-card ul{list-style:none}
+.content-card li{padding:11px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:14.5px;line-height:1.7;color:#d0d0d0}
+.content-card li:last-child{border-bottom:none}
+.content-card li .diamond{display:inline-block;width:5px;height:5px;background:var(--gold);border-radius:1px;margin-right:12px;vertical-align:middle;transform:rotate(45deg)}
+
+/* ═══════════ N-1 CARD ═══════════ */
+.n1-card{background:linear-gradient(145deg,rgba(180,40,40,.06),rgba(30,30,30,.9));border:1px solid rgba(180,40,40,.2);border-radius:10px;padding:32px 36px;animation:glowPulse 4s ease infinite}
+.n1-header{display:flex;align-items:center;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.n1-icon{width:56px;height:56px;border-radius:50%;background:rgba(180,40,40,.12);border:2px solid rgba(180,40,40,.3);display:flex;align-items:center;justify-content:center;font-size:28px;animation:pulseRing 2s ease infinite;flex-shrink:0}
+.n1-title{font-family:var(--ff-display);font-size:22px;font-weight:700}
+.n1-sub{font-family:var(--ff-mono);font-size:11px;color:var(--text-dim)}
+.n1-body{font-size:14.5px;color:#c8c8c8;line-height:1.7;margin-bottom:20px}
+.n1-bars{display:flex;gap:16px;flex-wrap:wrap}
+.n1-bar{flex:1 1 140px;min-width:120px}
+.n1-bar-header{display:flex;justify-content:space-between;font-family:var(--ff-mono);font-size:10px;color:#999;margin-bottom:4px}
+.n1-bar-track{height:7px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden}
+.n1-bar-fill{height:100%;border-radius:3px;width:0%;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+
+/* ═══════════ INITIATIVES ═══════════ */
+.initiative{display:flex;gap:16px;padding:16px 20px;background:rgba(255,255,255,.015);border:1px solid rgba(224,195,90,.08);border-radius:7px;align-items:center;margin-bottom:12px;transition:border-color .3s,transform .2s}
+.initiative:hover{border-color:rgba(224,195,90,.25);transform:translateX(4px)}
+.initiative .amt{font-family:var(--ff-display);font-size:20px;font-weight:700;color:var(--gold);min-width:88px;text-align:right}
+.initiative .divider{width:1px;height:38px;background:rgba(224,195,90,.15);flex-shrink:0}
+.initiative .src{font-family:var(--ff-mono);font-size:10px;color:var(--text-dim);letter-spacing:.08em;text-transform:uppercase}
+.initiative .desc{font-size:14px;color:#ccc;margin-top:2px;line-height:1.5}
+
+/* ═══════════ FACTS GRID ═══════════ */
+.facts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.fact-card{padding:18px 20px;background:rgba(224,195,90,.02);border:1px solid rgba(224,195,90,.08);border-radius:7px;font-size:13.5px;color:#bbb;line-height:1.65;transition:border-color .3s,transform .3s}
+.fact-card:hover{border-color:rgba(224,195,90,.25);transform:translateY(-3px)}
+.fact-card .star{color:var(--gold);font-weight:700;font-size:18px;margin-right:6px}
+
+/* ═══════════ COMPARISON TABLE ═══════════ */
+.cmp-table{width:100%;border-collapse:collapse;font-family:var(--ff-body)}
+.cmp-table th{padding:12px 14px;text-align:left;font-family:var(--ff-mono);font-size:10px;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;border-bottom:2px solid rgba(224,195,90,.2);white-space:nowrap}
+.cmp-table td{padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px;color:#aaa;white-space:nowrap}
+.cmp-table td:first-child{color:#ddd;font-weight:600}
+.cmp-table td:last-child{font-family:var(--ff-mono);font-size:11px;letter-spacing:1px;color:var(--gold)}
+
+/* ═══════════ IMPORT DONUTS ═══════════ */
+.import-circles{display:flex;justify-content:center;flex-wrap:wrap;gap:20px}
+.import-item{text-align:center;min-width:100px}
+.donut{width:74px;height:74px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;transition:transform .3s}
+.donut:hover{transform:scale(1.1)}
+.donut-inner{width:54px;height:54px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-family:var(--ff-mono);font-size:15px;font-weight:700}
+.import-label{font-family:var(--ff-mono);font-size:10px;color:#aaa;letter-spacing:.06em}
+
+/* ═══════════ TIMELINE ═══════════ */
+.timeline-item{display:flex;gap:16px;align-items:flex-start;margin-bottom:6px}
+.timeline-year{font-family:var(--ff-mono);font-size:13px;font-weight:700;color:var(--gold);min-width:52px;padding-top:2px}
+.timeline-dot-col{width:12px;display:flex;flex-direction:column;align-items:center;padding-top:6px;flex-shrink:0}
+.timeline-dot{width:8px;height:8px;border-radius:50%;border:2px solid var(--gold);background:transparent;transition:background .3s}
+.timeline-dot.filled{background:var(--gold)}
+.timeline-line{width:1px;height:44px;background:rgba(224,195,90,.15)}
+.timeline-text{font-size:14px;color:#ccc;line-height:1.6;padding-top:1px}
+
+/* ═══════════ FOOTER ═══════════ */
+footer{text-align:center;padding:24px 24px 60px;border-top:1px solid rgba(255,255,255,.04);position:relative;z-index:2}
+footer p{font-family:var(--ff-mono);font-size:9px;color:#444;letter-spacing:.08em;line-height:2.2;max-width:700px;margin:0 auto}
+footer .orise{color:var(--gold);opacity:.5}
+
+/* ═══════════ RIPPLE ═══════════ */
+.ripple-container{position:fixed;inset:0;pointer-events:none;z-index:9997;overflow:hidden}
+.ripple-circle{position:absolute;border-radius:50%;border:1px solid rgba(224,195,90,.3);width:20px;height:20px;margin:-10px;animation:ripple .8s ease-out forwards}
+
+/* ═══════════ RESPONSIVE ═══════════ */
+@media(max-width:600px){
+  .hex-nav{gap:4px}
+  .hex-btn{width:90px;height:100px}
+  .chain-btn{width:60px;height:60px}
+  .chain-btn .icon{font-size:16px}
+  .chain-btn .label{font-size:6px}
+  .content-card{padding:20px 18px}
+  .initiative{flex-direction:column;text-align:center}
+  .initiative .amt{text-align:center;min-width:auto}
+  .initiative .divider{width:40px;height:1px}
+}
+</style>
+</head>
+<body>
+
+<!-- Scroll progress -->
+<div id="scroll-progress"></div>
+
+<!-- Grain overlay canvas -->
+<canvas id="grain"></canvas>
+
+<!-- Particle + Hex canvas -->
+<canvas id="bg-canvas" style="position:fixed;inset:0;z-index:0;pointer-events:none"></canvas>
+
+<!-- Ripple container -->
+<div class="ripple-container" id="ripple-container"></div>
+
+<!-- Cursor trail -->
+<div id="cursor-trail"></div>
+
+<!-- ████ HERO ████ -->
+<header id="hero">
+  <div class="hero-badge"><span>U.S. DOE Critical Mineral — 2025 USGS List of 60</span></div>
+  <h1 id="hero-title">GRAPHITE</h1>
+  <p class="hero-sub">C — ATOMIC № 6 — HEXAGONAL CRYSTAL SYSTEM — sp² HYBRIDIZED</p>
+
+  <div class="element-card-wrap" id="element-card" onclick="this.classList.toggle('flipped')">
+    <div class="element-card-inner">
+      <div class="element-card-face card-front">
+        <span class="atomic-num">6</span>
+        <span class="symbol">C</span>
+        <span class="name">Carbon</span>
+        <span class="mass">12.011 u</span>
+        <span class="flip-hint">TAP TO FLIP</span>
+      </div>
+      <div class="element-card-face card-back">
+        <div class="prop"><span class="prop-k">Electrons</span><span class="prop-v">2, 4</span></div>
+        <div class="prop"><span class="prop-k">Melting Pt</span><span class="prop-v">3,652 °C</span></div>
+        <div class="prop"><span class="prop-k">Crystal</span><span class="prop-v">Hexagonal</span></div>
+        <div class="prop"><span class="prop-k">Density</span><span class="prop-v">2.267 g/cm³</span></div>
+        <div class="prop"><span class="prop-k">Mohs</span><span class="prop-v">1–2</span></div>
+        <div class="prop"><span class="prop-k">Conduct.</span><span class="prop-v">Anisotropic</span></div>
+        <span class="flip-hint" style="align-self:center;margin-top:6px">TAP TO FLIP</span>
+      </div>
+    </div>
+    <!-- Orbiting hexagons -->
+    <div class="orbit-ring">
+      <div class="orbit-hex" style="--dur:8s"><svg viewBox="0 0 20 20"><polygon points="10,1 18,5.5 18,14.5 10,19 2,14.5 2,5.5" fill="none" stroke="rgba(224,195,90,.3)" stroke-width="1"/></svg></div>
+      <div class="orbit-hex" style="--dur:8s;animation-delay:-2.67s"><svg viewBox="0 0 20 20"><polygon points="10,1 18,5.5 18,14.5 10,19 2,14.5 2,5.5" fill="none" stroke="rgba(224,195,90,.2)" stroke-width="1"/></svg></div>
+      <div class="orbit-hex" style="--dur:8s;animation-delay:-5.33s"><svg viewBox="0 0 20 20"><polygon points="10,1 18,5.5 18,14.5 10,19 2,14.5 2,5.5" fill="none" stroke="rgba(224,195,90,.15)" stroke-width="1"/></svg></div>
+    </div>
+  </div>
+
+  <p class="hero-hint">HOVER TITLE TO GLITCH · MOVE MOUSE FOR PARTICLES · CLICK ANYWHERE FOR RIPPLES</p>
+</header>
+
+<!-- ████ STATS RIBBON ████ -->
+<section id="stats-ribbon">
+  <div class="stats-grid stagger" id="stats-grid"></div>
+</section>
+
+<!-- DIVIDER -->
+<div class="hex-divider"><div class="line line-l"></div><svg width="24" height="28" viewBox="0 0 24 28"><polygon points="12,0 24,7 24,21 12,28 0,21 0,7" fill="none" stroke="rgba(224,195,90,.25)" stroke-width="1"/><circle cx="12" cy="14" r="2" fill="rgba(224,195,90,.3)"/></svg><div class="line line-r"></div></div>
+
+<!-- ████ GRAPHENE LAYERS ████ -->
+<section class="container reveal" id="graphene-section">
+  <div class="section-heading"><div class="bar"></div><h2>Atomic Structure</h2><p class="sub">Interactive graphene layer separation model</p></div>
+  <div class="graphene-wrap">
+    <svg id="graphene-svg" width="280" height="220" viewBox="0 0 280 220" style="margin:0 auto;display:block"></svg>
+    <div class="graphene-controls">
+      <span>COMPRESS</span>
+      <input type="range" id="graphene-slider" min="10" max="42" value="30" style="width:160px">
+      <span>EXPAND</span>
+    </div>
+    <p style="font-family:var(--ff-mono);font-size:10px;color:var(--text-faint);margin-top:6px">Drag to separate graphene layers — weak van der Waals bonds</p>
+  </div>
+</section>
+
+<div class="hex-divider"><div class="line line-l"></div><svg width="24" height="28" viewBox="0 0 24 28"><polygon points="12,0 24,7 24,21 12,28 0,21 0,7" fill="none" stroke="rgba(224,195,90,.25)" stroke-width="1"/><circle cx="12" cy="14" r="2" fill="rgba(224,195,90,.3)"/></svg><div class="line line-r"></div></div>
+
+<!-- ████ PRODUCTION ████ -->
+<section class="container reveal" id="production-section">
+  <div class="section-heading"><div class="bar"></div><h2>Global Mine Production (2024)</h2><p class="sub">1.6 million metric tons · hover for country details</p></div>
+  <div id="production-bars" style="max-width:700px;margin:0 auto"></div>
+  <div class="prod-tooltip" id="prod-tooltip"></div>
+</section>
+
+<div class="hex-divider"><div class="line line-l"></div><svg width="24" height="28" viewBox="0 0 24 28"><polygon points="12,0 24,7 24,21 12,28 0,21 0,7" fill="none" stroke="rgba(224,195,90,.25)" stroke-width="1"/><circle cx="12" cy="14" r="2" fill="rgba(224,195,90,.3)"/></svg><div class="line line-r"></div></div>
+
+<!-- ████ DEMAND ████ -->
+<section class="container reveal" id="demand-section">
+  <div class="section-heading"><div class="bar"></div><h2>Demand Trajectory</h2><p class="sub">million metric tons · IEA Stated Policies Scenario</p></div>
+  <div class="demand-chart"><svg id="demand-svg" viewBox="0 0 600 220" style="width:100%;overflow:visible"></svg>
+    <div class="demand-legend">
+      <span><span class="legend-box" style="background:rgba(224,195,90,.6)"></span>Actual (Mt)</span>
+      <span><span class="legend-box" style="background:rgba(224,195,90,.15);border:1px dashed rgba(224,195,90,.4)"></span>Projected (IEA STEPS)</span>
+    </div>
+  </div>
+</section>
+
+<div class="hex-divider"><div class="line line-l"></div><svg width="24" height="28" viewBox="0 0 24 28"><polygon points="12,0 24,7 24,21 12,28 0,21 0,7" fill="none" stroke="rgba(224,195,90,.25)" stroke-width="1"/><circle cx="12" cy="14" r="2" fill="rgba(224,195,90,.3)"/></svg><div class="line line-r"></div></div>
+
+<!-- ████ SUPPLY CHAIN ████ -->
+<section class="container reveal" id="chain-section">
+  <div class="section-heading"><div class="bar"></div><h2>Life-Cycle Supply Chain</h2><p class="sub">Click any stage · auto-cycles every 3 seconds</p></div>
+  <div class="chain-nodes" id="chain-nodes"></div>
+  <div class="chain-detail" id="chain-detail"></div>
+</section>
+
+<div class="hex-divider"><div class="line line-l"></div><svg width="24" height="28" viewBox="0 0 24 28"><polygon points="12,0 24,7 24,21 12,28 0,21 0,7" fill="none" stroke="rgba(224,195,90,.25)" stroke-width="1"/><circle cx="12" cy="14" r="2" fill="rgba(224,195,90,.3)"/></svg><div class="line line-r"></div></div>
+
+<!-- ████ DEEP DIVE ████ -->
+<section class="container reveal" id="deepdive-section">
+  <div class="section-heading"><div class="bar"></div><h2>Deep Dive</h2><p class="sub">Navigate with hexagons · arrow keys · or slider</p></div>
+  <div class="hex-nav" id="hex-nav"></div>
+  <div class="layer-slider">
+    <span>LAYER</span>
+    <input type="range" id="section-slider" min="0" max="5" value="0" style="flex:1">
+    <span class="val" id="slider-val">1/6</span>
+  </div>
+  <div class="content-panels" id="content-panels"></div>
+</section>
+
+<div class="hex-divider"><div class="line line-l"></div><svg width="24" height="28" viewBox="0 0 24 28"><polygon points="12,0 24,7 24,21 12,28 0,21 0,7" fill="none" stroke="rgba(224,195,90,.25)" stroke-width="1"/><circle cx="12" cy="14" r="2" fill="rgba(224,195,90,.3)"/></svg><div class="line line-r"></div></div>
+
+<!-- ████ N-1 ████ -->
+<section class="container-sm reveal" id="n1-section">
+  <div class="section-heading"><div class="bar"></div><h2>Supply Vulnerability: N-1 Scenario</h2><p class="sub">What happens if the top supplier is disrupted?</p></div>
+  <div class="n1-card">
+    <div class="n1-header">
+      <div class="n1-icon">⚠️</div>
+      <div><div class="n1-title">Only 35–40% of demand covered</div><div class="n1-sub">If China's supply is removed from the equation by 2035</div></div>
+    </div>
+    <div class="n1-body">The IEA's N-1 resilience assessment reveals that graphite and rare earths are the most vulnerable critical minerals. Remaining global supply would fall catastrophically short of demand if the dominant producer were disrupted — making supply-chain diversification existential for Western economies.</div>
+    <div class="n1-bars" id="n1-bars"></div>
+  </div>
+</section>
+
+<div class="hex-divider"><div class="line line-l"></div><svg width="24" height="28" viewBox="0 0 24 28"><polygon points="12,0 24,7 24,21 12,28 0,21 0,7" fill="none" stroke="rgba(224,195,90,.25)" stroke-width="1"/><circle cx="12" cy="14" r="2" fill="rgba(224,195,90,.3)"/></svg><div class="line line-r"></div></div>
+
+<!-- ████ U.S. INITIATIVES ████ -->
+<section class="container-sm stagger reveal" id="initiatives-section">
+  <div class="section-heading"><div class="bar"></div><h2>U.S. Government Initiatives</h2><p class="sub">Federal investments building domestic graphite capacity</p></div>
+  <div id="initiatives-list"></div>
+</section>
+
+<div class="hex-divider"><div class="line line-l"></div><svg width="24" height="28" viewBox="0 0 24 28"><polygon points="12,0 24,7 24,21 12,28 0,21 0,7" fill="none" stroke="rgba(224,195,90,.25)" stroke-width="1"/><circle cx="12" cy="14" r="2" fill="rgba(224,195,90,.3)"/></svg><div class="line line-r"></div></div>
+
+<!-- ████ FAST FACTS ████ -->
+<section class="container reveal" id="facts-section">
+  <div class="section-heading"><div class="bar"></div><h2>Fast Facts</h2><p class="sub">Things you might not know about graphite</p></div>
+  <div class="facts-grid stagger" id="facts-grid"></div>
+</section>
+
+<div class="hex-divider"><div class="line line-l"></div><svg width="24" height="28" viewBox="0 0 24 28"><polygon points="12,0 24,7 24,21 12,28 0,21 0,7" fill="none" stroke="rgba(224,195,90,.25)" stroke-width="1"/><circle cx="12" cy="14" r="2" fill="rgba(224,195,90,.3)"/></svg><div class="line line-r"></div></div>
+
+<!-- ████ COMPARISON TABLE ████ -->
+<section class="container reveal" id="table-section">
+  <div class="section-heading"><div class="bar"></div><h2>Anode Material Comparison</h2><p class="sub">How graphite stacks up against alternatives</p></div>
+  <div style="overflow-x:auto" id="table-wrap"></div>
+</section>
+
+<div class="hex-divider"><div class="line line-l"></div><svg width="24" height="28" viewBox="0 0 24 28"><polygon points="12,0 24,7 24,21 12,28 0,21 0,7" fill="none" stroke="rgba(224,195,90,.25)" stroke-width="1"/><circle cx="12" cy="14" r="2" fill="rgba(224,195,90,.3)"/></svg><div class="line line-r"></div></div>
+
+<!-- ████ IMPORT SOURCES ████ -->
+<section class="container-sm reveal" id="import-section">
+  <div class="section-heading"><div class="bar"></div><h2>U.S. Import Sources (2020–2023)</h2><p class="sub">The United States is 100% import-reliant for natural graphite</p></div>
+  <div class="import-circles stagger" id="import-circles"></div>
+</section>
+
+<div class="hex-divider"><div class="line line-l"></div><svg width="24" height="28" viewBox="0 0 24 28"><polygon points="12,0 24,7 24,21 12,28 0,21 0,7" fill="none" stroke="rgba(224,195,90,.25)" stroke-width="1"/><circle cx="12" cy="14" r="2" fill="rgba(224,195,90,.3)"/></svg><div class="line line-r"></div></div>
+
+<!-- ████ MARKET OUTLOOK ████ -->
+<section class="container-sm stagger reveal" id="timeline-section">
+  <div class="section-heading"><div class="bar"></div><h2>Market Outlook</h2><p class="sub">Key trends shaping the next decade</p></div>
+  <div id="timeline-list"></div>
+</section>
+
+<div class="hex-divider"><div class="line line-l"></div><svg width="24" height="28" viewBox="0 0 24 28"><polygon points="12,0 24,7 24,21 12,28 0,21 0,7" fill="none" stroke="rgba(224,195,90,.25)" stroke-width="1"/><circle cx="12" cy="14" r="2" fill="rgba(224,195,90,.3)"/></svg><div class="line line-r"></div></div>
+
+<!-- ████ FOOTER ████ -->
+<footer>
+  <p>
+    SOURCES: USGS Mineral Commodity Summaries 2024 &amp; 2025 · IEA Global Critical Minerals Outlook 2024 &amp; 2025<br>
+    Federal Register Final 2025 List of Critical Minerals · Natural Resources Canada Graphite Facts<br>
+    Benchmark Mineral Intelligence · Investing News Network · Graphite One PEA<br>
+    DOE Critical Materials Assessment · Statista / USGS Production Data<br><br>
+    <span class="orise">ORISE CRITICAL MINERALS UNDERGRADUATE SCHOLARSHIP COMPETITION 2026</span>
+  </p>
+</footer>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   ALL DATA
+   ═══════════════════════════════════════════════════════════════ */
+const PRODUCTION=[{c:"China",v:1270,p:78,r:81000},{c:"Madagascar",v:89,p:5.5,r:27000},{c:"Mozambique",v:75,p:4.7,r:25000},{c:"Brazil",v:68,p:4.2,r:74000},{c:"Indonesia",v:24,p:1.5,r:2400},{c:"India",v:23,p:1.4,r:11000},{c:"Canada",v:12,p:.7,r:1900},{c:"Norway",v:7,p:.4,r:600}];
+const DEMAND=[{y:"2020",m:.97},{y:"2021",m:1.13},{y:"2022",m:1.68},{y:"2023",m:1.53},{y:"2024",m:1.6},{y:"2030E",m:3.2},{y:"2040E",m:5.7}];
+const CHAIN=[{l:"Mining",d:"Open-pit / underground extraction of graphite-bearing schist and gneiss ores",i:"⛏️"},{l:"Crushing",d:"Ore crushed to liberate flakes; froth flotation raises purity to ~90–95 % C",i:"🔩"},{l:"Purification",d:"Caustic roast or HF-acid leach to 99.95 %+ purity for battery-grade graphite",i:"🧪"},{l:"Spheronize",d:"Flakes milled into 15–25 µm spheres, coated with amorphous carbon for anode use",i:"⚙️"},{l:"Manufacture",d:"Spherical graphite integrated into Li-ion battery anodes, refractories, lubricants",i:"🏭"},{l:"End Use",d:"EVs, grid storage, steelmaking, nuclear reactors, electronics, aerospace",i:"🔋"},{l:"Recycling",d:"Hydrometallurgical / direct recycling recovers >95 % of anode graphite from black mass",i:"♻️"}];
+const STATS=[{v:"1.6M",u:"metric tons",l:"Global production 2024"},{v:"78%",u:"",l:"China's share of mining"},{v:">90%",u:"",l:"China's share of processing"},{v:"0",u:"tons",l:"U.S. mine output 2024"},{v:"52K",u:"tons",l:"U.S. consumption 2024"},{v:"$115M",u:"",l:"U.S. market value 2024"},{v:"290M",u:"metric tons",l:"Global reserves"},{v:"50–100",u:"kg",l:"Graphite per EV battery"}];
+const SECTIONS={overview:{t:"What Is Graphite?",i:"◇",c:["Graphite is a naturally occurring crystalline allotrope of carbon — the same element as diamond, but with a radically different atomic architecture.","Its atoms arrange in flat hexagonal sheets called graphene. Weak van der Waals forces between layers let them slide freely, giving graphite its lubricity and making it the softest mineral on the Mohs scale that still conducts electricity.","Classified as a critical mineral on the 2025 USGS Final List of 60 Critical Minerals, graphite is essential to U.S. energy, defense, and manufacturing security.","Global graphite consumption reached 5.7 million tonnes in 2024 — roughly 70 % synthetic and 30 % natural — with demand projected to double by 2040 under current policies."]},uses:{t:"Primary Uses & Applications",i:"⚡",c:["Lithium-ion battery anodes — Every EV battery requires 50–100 kg of high-purity spherical graphite. Batteries now drive ~16 % of all natural-graphite demand and rising.","Steelmaking & refractories — Magnesia-graphite bricks line basic oxygen and electric-arc furnaces; alumina-graphite shapes are used in continuous casting.","Lubricants & seals — Graphite's lamellar structure provides dry lubrication surviving >450 °C, critical for aerospace and heavy industry.","Nuclear energy — Ultra-high-purity (99.999 %) graphite serves as a neutron moderator in advanced and small modular reactors.","Fuel cells & electronics — Expanded graphite foils form lightweight bipolar plates for PEM fuel cells; flexible sheets manage heat in data centers.","Pencils & coatings — Fine-grained graphite mixed with clay; also used in anti-corrosion and conductive coatings."]},supply:{t:"Supply Chain Challenges",i:"🔗",c:["China produced ~78 % of the world's mined graphite in 2024 — 1.27 Mt — and controls >90 % of spherical/coated graphite processing.","In Dec 2023, China imposed export-permit requirements, causing a 25 % drop in flake exports and 28 % fall in spherical graphite exports during 2024.","If China's supply were removed (N-1), remaining production covers only 35–40 % of demand by 2035 — the worst of any critical mineral.","Mozambique and Madagascar lack domestic refining; virtually all concentrate ships to China for processing, creating a midstream bottleneck.","U.S. natural graphite imports fell 20 % (Jan–Aug 2024 vs. 2023); apparent consumption dropped 21 %.","The U.S. Treasury extended temporary graphite exemptions for EV tax-credit rules through 2027."]},sources:{t:"Potential U.S. Sources",i:"🇺🇸",c:["Graphite Creek, Alaska (Graphite One) — One of the largest flake-graphite deposits in North America; ~10.8 Mt at 7.8 % Cg.","Coosa County, Alabama (Westwater Resources) — $125M under the BIL to build a coated-spherical-graphite production facility.","Vidalia, Louisiana (Syrah Resources) — Active Anode Material facility; supported by a $220M DOE loan.","Kentucky & Louisiana (Novonix / Cirba Solutions) — $125M for battery-grade graphite recycling facilities.","Dona Ana County, New Mexico — DOE-funded pilot research into bio-based precursor routes to synthetic graphite.","Urban mining — Hydrometallurgical recovery from spent batteries can reclaim >95 % of anode graphite."]},lifecycle:{t:"Life-Cycle Technologies",i:"⛏️",c:["Extraction — Open-pit or underground mining; ore grades range 2–15 % C; multi-stage froth flotation to ~90–95 % C concentrate.","Purification — Caustic-bake (NaOH at 2,000 °C) or HF-acid leach to 99.95 %+; thermal purification at >2,500 °C as a chemical-free path.","Spheronization — Flake jet-milled into 15–25 µm spheres (30–50 % yield); carbon-coated to improve first-cycle coulombic efficiency.","Synthetic production — Petroleum coke graphitized at 2,800–3,000 °C in Acheson furnaces; 2–3× costlier but avoids mining.","Recycling — Shredding, sieving, flotation; direct-recycling relithiates without full decomposition, saving ~60 % energy.","Flash Joule heating (Rice Univ.) converts waste carbon into turbostratic graphene in <1 s at >3,000 K."]},substitutes:{t:"Substitutions & Efficiency",i:"🔄",c:["Silicon anodes — ~10× capacity but 300 % swell; Si/C composites (5–20 % Si) are the near-term bridge.","Hard carbon — Biomass-derived; leading anode for sodium-ion batteries eliminating graphite and lithium entirely.","Lithium titanate (LTO) — Ultra-safe, >10,000 cycle life for grid storage and buses; lower energy density.","Dry-electrode coating — Eliminates toxic NMP solvent and drying ovens, cutting energy use 30 %+.","Thinner anodes & advanced binders — Reducing coating from 80 µm to 50 µm cuts graphite loading >25 % per kWh.","Synthetic graphite from renewables — Green electricity for Acheson furnaces drops CO₂ footprint up to 70 %."]}};
+const SKEYS=Object.keys(SECTIONS);
+const N1=[{m:"Graphite",c:37,col:"#c44"},{m:"Rare Earths",c:39,col:"#c44"},{m:"Nickel",c:53,col:"#c90"},{m:"Lithium",c:65,col:"#4a4"}];
+const INITIATIVES=[{a:"$125M",s:"Bipartisan Infrastructure Law",d:"Battery-grade graphite recycling facilities in Kentucky & Louisiana"},{a:"$125M",s:"Bipartisan Infrastructure Law",d:"Coated spherical graphite facility in Alabama (Westwater Resources)"},{a:"$220M",s:"DOE Loan Programs Office",d:"Syrah Resources' active anode material facility, Vidalia, Louisiana"},{a:"$8.3M",s:"Defense Production Act Title III",d:"Natural flake graphite mine development in Canada"},{a:"2027 Ext.",s:"U.S. Treasury",d:"Temporary graphite exemption for EV tax-credit FEOC import rules"}];
+const FACTS=["Diamond and graphite are both pure carbon — only the bonding differs. Graphite is thermodynamically stable at Earth's surface.","The word 'graphite' comes from the Greek graphein ('to write'). First described in 1789 by Abraham Gottlob Werner.","Graphite conducts electricity in-plane like a metal, but across layers it's 10,000× less conductive — extraordinarily anisotropic.","A single graphite layer is graphene — the strongest material ever measured (130 GPa), earning the 2010 Nobel Prize in Physics.","Spheronization wastes 50–70 % of input flake as fine dust; recovering this waste is a growing area of active research.","Natural graphite deposits formed 600 M–2 B years ago from carbon-rich sediments metamorphosed under extreme heat and pressure."];
+const IMPORTS=[{c:"China",p:43,col:"#e0c35a"},{c:"Canada",p:13,col:"#b0a050"},{c:"Mexico",p:13,col:"#908040"},{c:"Mozambique",p:13,col:"#706030"},{c:"Other",p:18,col:"#555"}];
+const TABLE=[["Graphite (natural)","372","1,000–3,000","Low","████████░░"],["Graphite (synthetic)","350–365","1,500–4,000","Med","███████░░░"],["Silicon composite","500–1,500","300–800","High","████░░░░░░"],["Hard carbon (Na-ion)","250–300","1,000+","Low","███░░░░░░░"],["Lithium titanate","175","10,000+","High","██████░░░░"]];
+const TIMELINE=[{y:"2024",e:"Global graphite demand grew 6–8 %; fine flake prices fell 20 % while medium/large flake rose 10 %.",f:true},{y:"2025",e:"Graphite included in the updated USGS Final List of 60 Critical Minerals; investment momentum slowed to 5 % growth.",f:false},{y:"2027",e:"Treasury temporary graphite exemption for EV tax credits expires — domestic supply must be materially online.",f:false},{y:"2030",e:"IEA projects graphite demand will double under current policies (STEPS), driven by EVs and grid-scale storage.",f:false},{y:"2035",e:"Top 3 refining nations still control ~80 % of battery-grade graphite; China alone ~80 % of spherical/coated output.",f:false},{y:"2040",e:"Demand projected to reach 5.7 Mt (STEPS) or nearly quadruple in Net Zero; combined mineral market exceeds $770 B.",f:false}];
+
+/* ═══════════════════════════════════════════════════════════════
+   BACKGROUND CANVAS — particles + hex grid
+   ═══════════════════════════════════════════════════════════════ */
+(function(){
+  const c=document.getElementById('bg-canvas'),ctx=c.getContext('2d');
+  let W,H;const mouse={x:-999,y:-999};
+  const particles=[];
+  function resize(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;}
+  resize();window.addEventListener('resize',resize);
+
+  // Create particles
+  for(let i=0;i<100;i++) particles.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.35,vy:(Math.random()-.5)*.35,r:1.5+Math.random()*2});
+
+  // Draw hex grid once on offscreen canvas
+  const hexC=document.createElement('canvas');
+  function drawHex(){
+    hexC.width=W;hexC.height=12000;
+    const hc=hexC.getContext('2d');
+    hc.strokeStyle='rgba(140,140,140,.04)';hc.lineWidth=.5;
+    const s=38,h=s*Math.sqrt(3);
+    for(let r=-1;r<hexC.height/h+1;r++){
+      for(let col=-1;col<W/(s*1.5)+1;col++){
+        const cx=col*s*1.5,cy=r*h+(col%2?h/2:0);
+        hc.beginPath();
+        for(let i=0;i<6;i++){const a=Math.PI/180*(60*i-30);i===0?hc.moveTo(cx+s*Math.cos(a),cy+s*Math.sin(a)):hc.lineTo(cx+s*Math.cos(a),cy+s*Math.sin(a));}
+        hc.closePath();hc.stroke();
+      }
+    }
+  }
+  drawHex();
+  window.addEventListener('resize',()=>{resize();drawHex();});
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    // Draw hex grid portion based on scroll
+    const sy=window.scrollY||0;
+    ctx.drawImage(hexC,0,sy,W,H,0,0,W,H);
+
+    const mx=mouse.x,my=mouse.y;
+    for(let i=0;i<particles.length;i++){
+      const p=particles[i];
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0)p.x=W;if(p.x>W)p.x=0;
+      if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+      const dx=p.x-mx,dy=p.y-my,dist=Math.sqrt(dx*dx+dy*dy);
+      const glow=dist<200?1-dist/200:0;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r+glow*3.5,0,Math.PI*2);
+      ctx.fillStyle=glow>0?`rgba(224,195,90,${.1+glow*.7})`:`rgba(160,160,160,.12)`;
+      ctx.fill();
+      for(let j=i+1;j<particles.length;j++){
+        const dx2=p.x-particles[j].x,dy2=p.y-particles[j].y,d2=Math.sqrt(dx2*dx2+dy2*dy2);
+        if(d2<140){
+          ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(particles[j].x,particles[j].y);
+          const a=(1-d2/140)*.07;
+          ctx.strokeStyle=glow>0?`rgba(224,195,90,${a+glow*.12})`:`rgba(160,160,160,${a})`;
+          ctx.lineWidth=.5;ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+  window.addEventListener('mousemove',e=>{mouse.x=e.clientX;mouse.y=e.clientY;});
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   FILM GRAIN
+   ═══════════════════════════════════════════════════════════════ */
+(function(){
+  const c=document.getElementById('grain'),ctx=c.getContext('2d');
+  c.width=256;c.height=256;
+  function noise(){
+    const d=ctx.createImageData(256,256),p=d.data;
+    for(let i=0;i<p.length;i+=4){const v=Math.random()*255;p[i]=p[i+1]=p[i+2]=v;p[i+3]=18;}
+    ctx.putImageData(d,0,0);requestAnimationFrame(noise);
+  }
+  noise();
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   SCROLL PROGRESS
+   ═══════════════════════════════════════════════════════════════ */
+window.addEventListener('scroll',()=>{
+  const h=document.documentElement.scrollHeight-window.innerHeight;
+  document.getElementById('scroll-progress').style.width=(window.scrollY/h*100)+'%';
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   CURSOR TRAIL
+   ═══════════════════════════════════════════════════════════════ */
+(function(){
+  const wrap=document.getElementById('cursor-trail');
+  const dots=[];for(let i=0;i<12;i++){const d=document.createElement('div');d.className='cursor-dot';d.style.transition=`left ${.1+i*.03}s,top ${.1+i*.03}s,opacity .4s`;wrap.appendChild(d);dots.push(d);}
+  let mx=-100,my=-100;
+  window.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+  function update(){
+    dots.forEach((d,i)=>{
+      setTimeout(()=>{d.style.left=mx+'px';d.style.top=my+'px';d.style.opacity=(.35-i*.025)+'';d.style.width=(6-i*.3)+'px';d.style.height=(6-i*.3)+'px';},i*25);
+    });
+    requestAnimationFrame(update);
+  }
+  update();
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   CLICK RIPPLES
+   ═══════════════════════════════════════════════════════════════ */
+document.addEventListener('click',e=>{
+  const r=document.createElement('div');r.className='ripple-circle';r.style.left=e.clientX+'px';r.style.top=e.clientY+'px';
+  document.getElementById('ripple-container').appendChild(r);
+  setTimeout(()=>r.remove(),800);
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   INTERSECTION OBSERVER — REVEALS
+   ═══════════════════════════════════════════════════════════════ */
+const revealObs=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});
+},{threshold:.15});
+document.querySelectorAll('.reveal,.stagger,.reveal-left,.reveal-right').forEach(el=>revealObs.observe(el));
+
+/* ═══════════════════════════════════════════════════════════════
+   BUILD: STATS
+   ═══════════════════════════════════════════════════════════════ */
+(function(){
+  const g=document.getElementById('stats-grid');
+  STATS.forEach(s=>{
+    const d=document.createElement('div');d.className='stat-item';
+    d.innerHTML=`<div class="stat-val">${s.v}<span class="stat-unit">${s.u}</span></div><div class="stat-label">${s.l}</div>`;
+    g.appendChild(d);
+  });
+  revealObs.observe(g);
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   BUILD: GRAPHENE LAYERS
+   ═══════════════════════════════════════════════════════════════ */
+(function(){
+  const svg=document.getElementById('graphene-svg');
+  const slider=document.getElementById('graphene-slider');
+  function render(sep){
+    let html='';
+    const layers=4;
+    const hexCenters=[[60,0],[100,0],[140,0],[180,0],[80,22],[120,22],[160,22]];
+    for(let layer=0;layer<layers;layer++){
+      const yOff=40+layer*sep,xOff=layer*8,op=1-layer*.2;
+      html+=`<g transform="translate(${xOff},${yOff})" opacity="${op}">`;
+      hexCenters.forEach(([cx,cy])=>{
+        let pts='';for(let i=0;i<6;i++){const a=Math.PI/3*i-Math.PI/6;pts+=`${cx+14*Math.cos(a)},${cy+14*Math.sin(a)} `;}
+        html+=`<polygon points="${pts}" fill="none" stroke="${layer===0?'rgba(224,195,90,.5)':'rgba(160,160,160,.2)'}" stroke-width="1"/>`;
+        html+=`<circle cx="${cx}" cy="${cy}" r="3" fill="${layer===0?'#e0c35a':'#555'}"/>`;
+      });
+      html+=`</g>`;
+    }
+    html+=`<text x="250" y="216" fill="#555" font-size="8" font-family="JetBrains Mono" text-anchor="end">d = ${(sep*.112).toFixed(1)} Å</text>`;
+    svg.innerHTML=html;
+  }
+  render(30);
+  slider.addEventListener('input',e=>render(+e.target.value));
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   BUILD: PRODUCTION BARS
+   ═══════════════════════════════════════════════════════════════ */
+(function(){
+  const wrap=document.getElementById('production-bars');
+  const tip=document.getElementById('prod-tooltip');
+  const max=PRODUCTION[0].v;
+  PRODUCTION.forEach((d,i)=>{
+    const row=document.createElement('div');row.className='prod-row';
+    row.innerHTML=`<span class="prod-country">${d.c}</span><div class="prod-track"><div class="prod-fill" data-w="${d.v/max*100}" style="background:${i===0?'linear-gradient(90deg,#e0c35a,#c9a83a)':`linear-gradient(90deg,rgba(224,195,90,${.5-i*.05}),rgba(180,160,60,${.3-i*.03}))`};transition-delay:${.3+i*.08}s"></div></div><span class="prod-val">${d.v.toLocaleString()} kt</span>`;
+    row.addEventListener('mouseenter',()=>{tip.innerHTML=`<strong style="color:#e0c35a">${d.c}</strong> — ${d.p}% of global production · Reserves: ${(d.r/1000).toFixed(0)}M metric tons`;tip.classList.add('active');});
+    row.addEventListener('mouseleave',()=>tip.classList.remove('active'));
+    wrap.appendChild(row);
+  });
+  // Animate on reveal
+  const obs=new IntersectionObserver(([e])=>{if(e.isIntersecting)wrap.querySelectorAll('.prod-fill').forEach(f=>f.style.width=f.dataset.w+'%');},{threshold:.2});
+  obs.observe(wrap);
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   BUILD: DEMAND CHART
+   ═══════════════════════════════════════════════════════════════ */
+(function(){
+  const svg=document.getElementById('demand-svg');
+  const maxMt=6,W=600,H=220,padL=40,padB=30,padT=20;
+  const chartW=W-padL-20,chartH=H-padT-padB;
+  const barW=chartW/DEMAND.length-14;
+  let html='<defs><linearGradient id="pg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(224,195,90,.25)"/><stop offset="100%" stop-color="rgba(224,195,90,.08)"/></linearGradient></defs>';
+  for(let v=0;v<=6;v++){
+    const y=padT+chartH-(v/maxMt)*chartH;
+    html+=`<line x1="${padL}" y1="${y}" x2="${W-20}" y2="${y}" stroke="rgba(255,255,255,.04)" stroke-width=".5"/>`;
+    html+=`<text x="${padL-6}" y="${y+4}" fill="#555" font-size="9" text-anchor="end" font-family="JetBrains Mono">${v}</text>`;
+  }
+  DEMAND.forEach((d,i)=>{
+    const x=padL+i*(chartW/DEMAND.length)+8;
+    const barH=(d.m/maxMt)*chartH;
+    const proj=d.y.includes('E');
+    html+=`<rect class="demand-bar" x="${x}" y="${padT+chartH}" width="${barW}" height="0" rx="3" data-h="${barH}" data-y="${padT+chartH-barH}" fill="${proj?'url(#pg)':'rgba(224,195,90,.6)'}" ${proj?'stroke="rgba(224,195,90,.4)" stroke-width="1" stroke-dasharray="4 3"':''} style="transition:all .8s ${.2+i*.1}s cubic-bezier(.4,0,.2,1)"/>`;
+    html+=`<text x="${x+barW/2}" y="${H-6}" fill="#666" font-size="9" text-anchor="middle" font-family="JetBrains Mono">${d.y}</text>`;
+    html+=`<text class="demand-label" x="${x+barW/2}" y="${padT+chartH-barH-6}" fill="#888" font-size="9" text-anchor="middle" font-family="JetBrains Mono" opacity="0" style="transition:opacity .5s ${.5+i*.1}s">${d.m.toFixed(1)}</text>`;
+  });
+  svg.innerHTML=html;
+  const obs=new IntersectionObserver(([e])=>{
+    if(e.isIntersecting){
+      svg.querySelectorAll('.demand-bar').forEach(b=>{b.setAttribute('y',b.dataset.y);b.setAttribute('height',b.dataset.h);});
+      svg.querySelectorAll('.demand-label').forEach(l=>l.setAttribute('opacity','1'));
+    }
+  },{threshold:.2});
+  obs.observe(svg);
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   BUILD: SUPPLY CHAIN
+   ═══════════════════════════════════════════════════════════════ */
+(function(){
+  const wrap=document.getElementById('chain-nodes');
+  const detail=document.getElementById('chain-detail');
+  let active=0,timer;
+  function render(){
+    wrap.innerHTML='';
+    CHAIN.forEach((s,i)=>{
+      const node=document.createElement('div');node.className='chain-node';
+      const btn=document.createElement('button');btn.className='chain-btn'+(i===active?' active':'')+(i<active?' past':'');
+      btn.innerHTML=`<span class="icon">${s.i}</span><span class="label">${s.l}</span>`;
+      btn.onclick=()=>{active=i;render();resetTimer();};
+      node.appendChild(btn);
+      if(i<CHAIN.length-1){const c=document.createElement('div');c.className='chain-connector'+(i<active?' past':'');node.appendChild(c);}
+      wrap.appendChild(node);
+    });
+    detail.innerHTML=`<strong>${CHAIN[active].l}</strong><br>${CHAIN[active].d}`;
+  }
+  function resetTimer(){clearInterval(timer);timer=setInterval(()=>{active=(active+1)%CHAIN.length;render();},3000);}
+  render();resetTimer();
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   BUILD: DEEP DIVE (hex nav + content panels)
+   ═══════════════════════════════════════════════════════════════ */
+(function(){
+  const nav=document.getElementById('hex-nav');
+  const panels=document.getElementById('content-panels');
+  const slider=document.getElementById('section-slider');
+  const valEl=document.getElementById('slider-val');
+  let active=0;
+
+  function buildNav(){
+    nav.innerHTML='';
+    SKEYS.forEach((k,i)=>{
+      const btn=document.createElement('button');
+      btn.className='hex-btn'+(i===active?' active':'');
+      const label=SECTIONS[k].t.length>18?SECTIONS[k].t.split(' ').slice(0,2).join(' '):SECTIONS[k].t;
+      btn.innerHTML=`<span class="h-icon">${SECTIONS[k].i}</span><span class="h-label">${label}</span>`;
+      btn.onclick=()=>setActive(i);
+      nav.appendChild(btn);
+    });
+  }
+  function buildPanels(){
+    panels.innerHTML='';
+    SKEYS.forEach((k,i)=>{
+      const div=document.createElement('div');
+      div.className='content-panel'+(i===active?' active':'');
+      div.id='panel-'+k;
+      let lis='';SECTIONS[k].c.forEach(c=>{lis+=`<li><span class="diamond"></span>${c}</li>`;});
+      div.innerHTML=`<div class="content-card"><h2><span class="ico">${SECTIONS[k].i}</span>${SECTIONS[k].t}</h2><ul>${lis}</ul></div>`;
+      panels.appendChild(div);
+    });
+  }
+  function setActive(i){
+    active=i;slider.value=i;valEl.textContent=`${i+1}/${SKEYS.length}`;
+    buildNav();buildPanels();
+  }
+  slider.addEventListener('input',e=>setActive(+e.target.value));
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key==='ArrowDown')setActive(Math.min(active+1,SKEYS.length-1));
+    if(e.key==='ArrowLeft'||e.key==='ArrowUp')setActive(Math.max(active-1,0));
+  });
+  setActive(0);
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   BUILD: N-1 BARS
+   ═══════════════════════════════════════════════════════════════ */
+(function(){
+  const wrap=document.getElementById('n1-bars');
+  N1.forEach(m=>{
+    const d=document.createElement('div');d.className='n1-bar';
+    d.innerHTML=`<div class="n1-bar-header"><span>${m.m}</span><span style="color:${m.col}">${m.c}%</span></div><div class="n1-bar-track"><div class="n1-bar-fill" data-w="${m.c}" style="background:${m.col}"></div></div>`;
+    wrap.appendChild(d);
+  });
+  const obs=new IntersectionObserver(([e])=>{if(e.isIntersecting)wrap.querySelectorAll('.n1-bar-fill').forEach(f=>f.style.width=f.dataset.w+'%');},{threshold:.3});
+  obs.observe(wrap);
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   BUILD: INITIATIVES
+   ═══════════════════════════════════════════════════════════════ */
+(function(){
+  const wrap=document.getElementById('initiatives-list');
+  INITIATIVES.forEach(item=>{
+    const d=document.createElement('div');d.className='initiative';
+    d.innerHTML=`<div class="amt">${item.a}</div><div class="divider"></div><div><div class="src">${item.s}</div><div class="desc">${item.d}</div></div>`;
+    wrap.appendChild(d);
+  });
+  revealObs.observe(wrap.closest('.stagger')||wrap);
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   BUILD: FACTS
+   ═══════════════════════════════════════════════════════════════ */
+(function(){
+  const g=document.getElementById('facts-grid');
+  FACTS.forEach(f=>{
+    const d=document.createElement('div');d.className='fact-card';
+    d.innerHTML=`<span class="star">※</span>${f}`;
+    g.appendChild(d);
+  });
+  revealObs.observe(g);
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   BUILD: COMPARISON TABLE
+   ═══════════════════════════════════════════════════════════════ */
+(function(){
+  const wrap=document.getElementById('table-wrap');
+  let html='<table class="cmp-table"><thead><tr><th>Material</th><th>Capacity (mAh/g)</th><th>Cycle Life</th><th>Cost</th><th>Maturity</th></tr></thead><tbody>';
+  TABLE.forEach(row=>{html+='<tr>';row.forEach((c,j)=>{html+=`<td>${c}</td>`;});html+='</tr>';});
+  html+='</tbody></table>';
+  wrap.innerHTML=html;
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   BUILD: IMPORT DONUTS
+   ═══════════════════════════════════════════════════════════════ */
+(function(){
+  const wrap=document.getElementById('import-circles');
+  IMPORTS.forEach(s=>{
+    const d=document.createElement('div');d.className='import-item';
+    d.innerHTML=`<div class="donut" style="background:conic-gradient(${s.col} 0% ${s.p}%, rgba(255,255,255,.03) ${s.p}% 100%);border:3px solid ${s.col}"><div class="donut-inner" style="color:${s.col}">${s.p}%</div></div><div class="import-label">${s.c}</div>`;
+    wrap.appendChild(d);
+  });
+  revealObs.observe(wrap);
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   BUILD: TIMELINE
+   ═══════════════════════════════════════════════════════════════ */
+(function(){
+  const wrap=document.getElementById('timeline-list');
+  TIMELINE.forEach((item,i)=>{
+    const d=document.createElement('div');d.className='timeline-item';
+    d.innerHTML=`<div class="timeline-year">${item.y}</div><div class="timeline-dot-col"><div class="timeline-dot${item.f?' filled':''}"></div>${i<TIMELINE.length-1?'<div class="timeline-line"></div>':''}</div><div class="timeline-text">${item.e}</div>`;
+    wrap.appendChild(d);
+  });
+  revealObs.observe(wrap.closest('.stagger')||wrap);
+})();
+</script>
+</body>
+</html>
