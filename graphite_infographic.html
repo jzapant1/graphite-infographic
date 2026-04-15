@@ -1,0 +1,2413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- page settings -->
+     <meta charset="UTF-">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>ORISE 2026 Graphite Critical Mineral Infographic</title>
+
+    <!-- google fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+
+    <link href="https://fonts.googleapis.com/css2?
+    family=Playfair+Display:wght@400;700&
+    family=Barlow+Condensed:wght@400;500;600;700&
+    family=IBM+Plex+Mono:wght@400;500&
+    family=Barlow:wght@400;500&
+    display=swap" rel="stylesheet">
+
+    <!-- libraries -->
+
+    <!-- maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    
+    <!-- data visual -->
+    <script defer src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
+
+    <!-- maps -->
+    <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- animation -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+    <!-- graph -->
+    <script defer src="https://cdn.jsdelivr.net/npm/dagre@0.8.5/dist/dagre.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/cytoscape-dagre@2.5.0/cytoscape-dagre.min.js"></script>
+
+    <!-- counter -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/countup.js/2.8.0/countUp.umd.js"></script>
+
+    <!-- global styles -->
+    <style>
+    
+    /* reset browser defaults */
+
+    *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* design var */
+    
+    :root {
+
+        /* colors */        
+
+        /* neutral colors */
+        --color-black:      #1C1C1A;
+        --color-dark-gray:  #3D3D3A;
+        --color-mid-gray:   #888780;
+        --color-light-gray: #D3D1C7;
+        --color-offwhite:   #F1EFE8;
+
+        /* accents */
+        --color-gold:       #EF9F27;
+        --color-gold-dim:   #BA7517;
+        --color-teal:       #1D9E75;
+        --color-coral:      #D85A30;
+        --color-blue:       #378ADD;
+        --color-purple:     #7F77DD;
+
+
+        /* fonts */
+        --font-display: 'Playfair Display', serif;
+        --font-heading: 'Barlow Condensed', sans-serif;
+        --font-body: 'Barlow', sans-serif;
+        --font-mono: 'IBM Plex Mono', monospace;
+
+        /* layout */
+        --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+        --context-max-width: 1200px;
+    }
+
+    html{
+        scroll-behavior: smooth;
+    }
+
+    /* base style */
+    body {
+        background: var(--color-black);
+        color: var(--color-pale);
+        font-family: var(--font-body);
+        font-weight: 400;
+        line-height: 1.6;
+        overflow-x: hidden;
+    }
+
+    a {
+        color: var(--color-gold);
+        text-decoration: none;
+    }
+
+    a:hover {
+        color: var(--color-gold-dim);
+    }
+
+    /* hex bg */
+
+    #hex-background {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        overflow: hidden;
+    }
+
+    /* nav bar */
+
+    #navigation {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 32px;
+        height: 52px;
+        background: rgba(28, 28, 26, 0.92);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
+
+    .nav-wordmark {
+        font-family: var (--font-heading);
+        font-size: 13px;
+        letter-spacing: 0.2em;
+        color: var(--color-offwhite);
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+
+    .nav-dot {
+        width: 44px;
+        height: 44px;
+        border: none;
+        background: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+    }
+
+    .nav-dots {
+        display: flex;
+        flex-direction: row;
+        gap: 12px;
+    }
+
+    .nav-dot::after {
+        content: '';
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        border: 1.5px solid var(--color-mid-gray);
+        background: transparent;
+        transition: all 0.35s var(--ease-smooth);
+    }
+
+    .nav-dot.active::after {
+        background: var(--color-gold);
+        border-color: var(--color-gold);
+    }
+
+   .nav-dot[data-accent="coral"].nav-dot.active::after {
+        background: var(--color-coral);
+        border-color: var(--color-coral);
+    } 
+
+   .nav-dot[data-accent="teal"].nav-dot.active::after {
+        background: var(--color-teal);
+        border-color: var(--color-teal);
+    } 
+    
+   .nav-dot[data-accent="blue"].nav-dot.active::after {
+        background: var(--color-blue);
+        border-color: var(--color-blue);
+    } 
+
+   .nav-dot[data-accent="purple"].nav-dot.active::after {
+        background: var(--color-purple);
+        border-color: var(--color-purple);
+    } 
+
+    /* shared wrapper layout */
+    .section-inner {
+        max-width: var(--context-max-width);
+        margin: 0 auto;
+        padding: 96px 40px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .section-label {
+        font-family: var(--font-heading);
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+    }
+
+    .section-title {
+        font-family: var(--font-display);
+        font-size: clamp(28px, 3.5vw, 36px);
+        color: var(--color-offwhite);
+        font-weight: 700;
+        margin-bottom: 40px;
+        line-height: 1.2;
+    }
+
+    /* 2-column layout */
+    .two-column {
+        display: flex;
+        gap: 48px;
+        align-items: flex-start;
+    }
+
+    .column-65 { flex: 0 0 65%; min-width: 0; }
+    .column-35 { flex: 1; min-width: 0; }
+    .column-70 { flex: 0 0 70%; min-width: 0; }
+    .column-30 { flex: 1; min-width: 0; }
+
+    /* hero section */
+
+    #hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding-top: 22vh;
+        position: relative;
+    }
+
+    .hero-overline {
+        font-family: var(--font-heading);
+        font-size: 13px;
+        letter-spacing: 0.25em;
+        color: var(--color-gold);
+        text-transform: uppercase;
+        font-weight: 500;
+        margin-bottom: 16px;
+    }
+
+    .hero-title {
+        font-family: var(--font-display);
+        font-size: clamp(56px, 8vw, 96px);
+        color: var(--color-offwhite);
+        font-weight: 700;
+        line-height: 0.95;
+        letter-spacing: -0.02em;
+    }
+    
+    .hero-subtitle {
+        font-family: var(--font-body);
+        font-size: 18px;
+        font-weight: 400;
+        color: var(--color-light-gray);
+        max-width: 560px;
+        margin: 20px auto 0;
+        line-height: 1.75;
+    }
+    
+    .hero-lattice {
+        margin: 32px auto 0;
+        display: block;
+    }
+
+    .hero-stats-row {
+        display: flex;
+        gap: 24px;
+        justify-content: center;
+        margin-top: 48px;
+        flex-wrap: wrap;
+    }
+
+    .hero-stat-card {
+        text-align: center;
+        border: 1px solid var(--color-mid-gray);
+        background: rgba(255, 255, 255, 0.03);
+        padding: 24px 28px;
+        border-radius: 8px;
+        min-width: 180px;
+    }
+
+    .hero-stat-label {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--color-light-gray);
+        margin-top: 10px;
+        font-weight: 400;
+    }
+
+    .hero-stat-number {
+        font-family: var(--font-display);
+        font-size: 52px;
+        color: var(--color-gold);
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    /* scroll cue */
+
+    .scroll-cue {
+        position: absolute;
+        bottom: -100px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .scroll-cue svg {
+        animation: bounce-arrow 1.6s ease-in-out infinite;
+    }
+
+    .scroll-cue-label {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--color-mid-gray);
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        animation: bounce-fade 1.6s ease-in-out infinite;
+    }
+
+    /* keyframe animation */
+    @keyframes bounce-arrow {
+        0%, 100% {transform: translateY(0);}
+        50% {transform: translateY(8px);}
+    }
+
+    @keyframes bounce-fade {
+        0%, 100% {opacity: 0.5;}
+        50% {opacity: 1;}
+    }
+
+    @keyframes hex-pulse {
+        0%, 100% {stroke-opacity: 0.055;}
+        50% {stroke-opacity: 0.28;}
+    }
+
+    /* visual wrappers */
+
+    /* timeline */
+    .timeline-wrapper {
+        width: 100%;
+        aspect-ratio: 16/10;
+        position: relative;
+    }
+    .timeline-wrapper svg {
+        width: 100%;
+        height: 100%;
+    }
+
+    /* sankey */
+    .sankey-wrapper {
+        width: 100%;
+        height: 480px;
+        position: relative;
+    }
+
+    .sankey-wrapper svg {
+        width: 100%;
+        height: 100%;
+    }
+
+    .status-dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 10px;
+        vertical-align: middle;
+    }
+
+    .sidebar p {
+        font-size: 16px;
+        font-weight: 400;
+        color: var(--color-light-gray);
+        margin-bottom: 24px;
+        line-height: 1.8;
+        text-align: left;
+    }
+
+    /* sankey section extra */
+    .sankey-label {
+        font-family: var(--font-heading);
+        font-size: 11px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--color-coral);
+        margin-bottom: 20px;
+        font-weight: 500;
+    }
+
+    .reserve-bar-wrapper {
+        margin-top: 48px;
+        padding: 28px;
+        background: var(--color-dark-gray);
+        border-radius: 8px;
+        position: relative;
+    }
+
+    .reserve-bar-title {
+        font-family: var(--font-heading);
+        font-size: 13px;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--color-offwhite);
+        margin-bottom: 16px;
+        font-weight: 500;
+    }
+
+    .reserve-bar {
+        display: flex;
+        height: 64px;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 4px;
+    }
+
+    .reserve-bar-segment {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: var(--color-offwhite);
+        font-weight: 400;
+        gap: 2px;
+    }
+
+    .reserve-bar-segment-label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        line-height: 1;
+        opacity: 0.8;
+    }
+
+    .reserve-bar-callout {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--color-coral);
+        text-align: center;
+        margin-top: 8px;
+        margin-bottom: 0;
+    }
+
+    /* section separators */
+    .section-separator {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        max-width: var(--context-max-width);
+        margin: 0 auto;
+        padding: 0 40px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .section-separator::before,
+    .section-separator::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--color-dark-gray);
+    }
+
+    .separator-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    /* map section */
+    .map-layout {
+        display: flex;
+        gap: 32px;
+        align-items: stretch;
+    }
+
+    .map-container {
+        flex: 0 0 70%;
+        height: 560px;
+        border-radius: 8px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    #leaflet-map {
+        width: 100%;
+        height: 100%;
+    }
+
+    .map-sidebar {
+        flex: 1;
+        background: var(--color-dark-gray);
+        border-radius: 8px;
+        padding: 28px;
+        display: flex;
+        flex-direction: column;
+        transition: opacity 0.2s;
+    }
+
+    .map-sidebar h3 {
+        font-family: var(--font-display);
+        font-size: 22px;
+        color: var(--color-offwhite);
+        font-weight: 700;
+        margin-bottom: 12px;
+        line-height: 1.2;
+    }
+
+    .map-sidebar p {
+        font-size: 16px;
+        font-weight: 400;
+        color: var(--color-light-gray);
+        line-height: 1.8;
+        margin-bottom: 16px;
+        text-align: left;
+    }
+
+    .deposit-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 3px 12px;
+        border-radius: 20px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        margin-bottom: 10px;
+        font-weight: 400;
+    }
+
+    .deposit-badge-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .deposit-type-pill {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 12px;
+        background: var(--color-dark-gray);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--color-light-gray);
+        margin-left: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+ 
+    .deposit-divider {
+        border: none;
+        height: 1px;
+        background: var(--color-dark-gray);
+        margin: 14px 0;
+    }
+
+    /* map legend */
+    .map-legend {
+        position: absolute;
+        bottom: 16px;
+        left: 16px;
+        z-index: 800;
+        background: rgba(28, 28, 26, 0.92);
+        padding: 12px 16px;
+        border-radius: 6px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+ 
+    .map-legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--color-light-gray);
+    }
+ 
+    .map-legend-swatch {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        border: 1.5px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .button-outline {
+        margin-top: auto;
+        padding: 8px 16px;
+        border: 1px solid var(--color-mid-gray);
+        border-radius: 6px;
+        background: transparent;
+        color: var(--color-light-gray);
+        cursor: pointer;
+        font-family: var(--font-body);
+        font-size: 13px;
+        min-height: 44px;
+        transition: border-color 0.2s;
+    }
+ 
+    .button-outline:hover {
+        border-color: var(--color-offwhite);
+    }
+
+    /* cytoscape */
+    .cytoscape-wrapper {
+        width: 100%;
+        height: 520px;
+        border-radius: 8px;
+        overflow: hidden;
+        background: rgba(28, 28, 26, 0.4);
+        position: relative;
+    }
+ 
+    .cytoscape-direction-label {
+        position: absolute;
+        top: 12px;
+        right: 16px;
+        font-family: var(--font-heading);
+        font-size: 11px;
+        letter-spacing: 0.2em;
+        color: var(--color-mid-gray);
+        text-transform: uppercase;
+        z-index: 2;
+        pointer-events: none;
+    }
+ 
+    #cytoscape-container {
+        width: 100%;
+        height: 100%;
+    }
+
+    /* cytoscape legend */
+
+    .cytoscape-legend {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+    }
+ 
+    .cytoscape-legend-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--color-offwhite);
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+ 
+    .cytoscape-legend-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    /* legislation sidebar */
+
+    .legislation-sidebar {
+        background: var(--color-dark-gray);
+        border-radius: 8px;
+        padding: 28px;
+    }
+ 
+    .legislation-sidebar h3 {
+        font-family:  var(--font-display);
+        font-size:    22px;
+        color:        var(--color-offwhite);
+        font-weight:  700;
+        margin-bottom: 12px;
+        line-height:  1.2;
+    }
+ 
+    .legislation-sidebar p {
+        font-size:     16px;
+        font-weight:   400;
+        color:         var(--color-light-gray);
+        line-height:   1.8;
+        margin-bottom: 16px;
+        text-align:    left;
+    }
+ 
+    .governance-badge {
+        display: inline-block;
+        padding: 3px 12px;
+        border-radius: 20px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--color-offwhite);
+        margin-bottom: 10px;
+        font-weight: 400;
+    }
+
+    /* market data section */
+
+    /* tab bar */
+
+    .market-tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 32px;
+    }
+ 
+    .market-tab-button {
+        padding: 8px 22px;
+        border-radius: 4px;
+        border: 1.5px solid var(--color-mid-gray);
+        background: transparent;
+        color: var(--color-light-gray);
+        font-family: var(--font-heading);
+        font-size: 13px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.25s;
+        min-height: 44px;
+        font-weight: 500;
+    }
+ 
+    .market-tab-button.active {
+        border-color: var(--color-gold);
+        background:   var(--color-gold);
+        color:        var(--color-black);
+    }
+ 
+    .market-tab-button:hover:not(.active) {
+        border-color: var(--color-offwhite);
+    }
+
+    /* horizontal bar group */
+
+    .bar-group {
+        margin-bottom: 28px;
+    }
+ 
+    .bar-group-label {
+        font-family:    var(--font-heading);
+        font-size:      13px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color:          var(--color-offwhite);
+        margin-bottom:  10px;
+        font-weight:    500;
+    }
+ 
+    .bar-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 5px;
+    }
+ 
+    .bar-label {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--color-mid-gray);
+        width: 130px;
+        flex-shrink: 0;
+        text-align: right;
+        font-weight: 400;
+    }
+ 
+    .bar-track {
+        flex: 1;
+        height: 24px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 3px;
+        overflow: hidden;
+    }
+ 
+    .bar-fill {
+        height: 100%;
+        border-radius: 3px;
+        transition: width 0.7s var(--ease-smooth);
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding-right: 8px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--color-offwhite);
+        font-weight: 400;
+        min-width: 30px;
+    }
+
+    .bar-scale {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 4px;
+        margin-left: 142px;           
+        font-family: var(--font-mono);
+        font-size: 10px;
+        color: var(--color-mid-gray);
+    }
+
+    .econ-cards {
+        display: flex;
+        gap: 20px;
+        margin-top: 56px;
+        flex-wrap: wrap;
+    }
+ 
+    .econ-card {
+        flex: 1;
+        min-width: 220px;
+        background: var(--color-dark-gray);
+        border-radius: 8px;
+        padding: 28px;
+    }
+ 
+    .econ-card-number {
+        font-family:  var(--font-display);
+        font-size:    44px;
+        color:        var(--color-gold);
+        font-weight:  700;
+        line-height:  1;
+    }
+ 
+    .econ-card-text {
+        font-family:  var(--font-body);
+        font-size:    14px;
+        font-weight:  400;
+        color:        var(--color-light-gray);
+        margin-top:   10px;
+        line-height:  1.5;
+    }
+ 
+    .econ-card-source {
+        font-family:  var(--font-mono);
+        font-size:    11px;
+        color:        var(--color-mid-gray);
+        margin-top:   14px;
+        font-weight:  400;
+    }
+ 
+    .data-caption {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--color-mid-gray);
+        line-height: 1.5;
+    }
+
+    /* footer */
+
+    .footer-closing {
+        font-family:  var(--font-display);
+        font-size:    18px;
+        color:        var(--color-offwhite);
+        max-width:    640px;
+        margin-bottom: 28px;
+        line-height:  1.6;
+        font-weight:  400;
+    }
+ 
+    #footer {
+        max-width:  var(--content-max-width);
+        margin:     0 auto;
+        padding:    64px 40px 48px;
+        border-top: 1px solid var(--color-dark-gray);
+        position:   relative;
+        z-index:    1;
+    }
+ 
+    #footer p {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--color-mid-gray);
+        line-height: 1.7;
+        margin-bottom: 8px;
+        font-weight: 400;
+    }
+
+    /* tooltip */
+    .tooltip {
+        position: fixed;
+        z-index: 1100;
+        background: var(--color-black);
+        border: 1px solid var(--color-mid-gray);
+        border-radius: 6px;
+        padding: 14px 18px;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.15s;
+        max-width: 240px;
+    }
+ 
+    .tooltip-title {
+        font-family: var(--font-body);
+        font-size: 13px;
+        color: var(--color-offwhite);
+        font-weight: 500;
+    }
+ 
+    .tooltip-value {
+        font-family: var(--font-mono);
+        font-size: 20px;
+        color: var(--color-gold);
+        margin: 4px 0;
+        font-weight: 400;
+    }
+ 
+    .tooltip-detail {
+        font-family: var(--font-body);
+        font-size: 11px;
+        color: var(--color-light-gray);
+        line-height: 1.45;
+        font-weight: 400;
+    }
+
+    /* responsive adapt */
+
+    @media (max-width: 900px) {
+        .two-column,
+        .map-layout {
+        flex-direction: column;
+    }
+ 
+        .column-65,
+        .column-35,
+        .column-70,
+        .column-30,
+        .map-container {
+        flex: none !important;
+        width: 100% !important;
+    }
+ 
+        .map-container { height: 400px; }
+        .sankey-wrapper { height: 340px; }
+        .hero-stats-row { gap: 16px; }
+        .econ-cards { flex-direction: column; }
+        .bar-label { width: 100px; font-size: 11px; }
+        .bar-scale { margin-left: 112px; }
+        .hero-stat-card { min-width: 140px; padding: 18px 20px; }
+        .cytoscape-legend { gap: 6px; }
+    }
+
+    @media (max-width: 600px) {
+      .section-inner { padding: 64px 20px; }
+      .hero-stat-number { font-size: 36px; }
+      .hero-stats-row { gap: 12px; }
+      #navigation { padding: 0 16px; }
+      .nav-dots { display: flex; gap: 12px; }
+      .section-separator { padding: 0 20px; }
+      .hero-stat-card { min-width: 120px; padding: 16px; }
+    }
+
+    /* leaflet tooltip override */
+    .leaflet-tt {
+        background: var(--color-black) !important;
+        color: var(--color-offwhite) !important;
+        border: 1px solid var(--color-mid-gray) !important;
+        border-radius: 4px !important;
+        font-family: var(--font-body) !important;
+        font-size: 12px !important;
+        padding: 4px 10px !important;
+        box-shadow: none !important;
+    }
+    </style>
+</head>
+
+<body>
+    <div id="hex-background"></div>
+
+    <nav id="navigation">
+        <div class="nav-wordmark">GRAPHITE</div>
+
+        <div class="nav-dots">
+            <button class="nav-dot active" data-index="0" data-accent="gold" aria-label="Hero"></button>
+            <button class="nav-dot" data-index="1" data-accent="gold" aria-label="Uses"></button>
+            <button class="nav-dot" data-index="2" data-accent="coral" aria-label="Supply"></button>
+            <button class="nav-dot" data-index="3" data-accent="teal" aria-label="Sources"></button>
+            <button class="nav-dot" data-index="4" data-accent="blue" aria-label="Lifecycle"></button>
+            <button class="nav-dot" data-index="5" data-accent="purple" aria-label="Substitutions"></button>
+        </div>
+    </nav>
+
+    <!-- overline & title -->
+    <section id="hero">
+        <div class="hero-content">
+            <div class="hero-overline">CRITICAL MINERAL</div>
+            <h1 class="hero-title">Graphite</h1>
+            <p class ="hero-subtitle">
+                The driving force of the battery revolution, and yet over nearly the entire global supply passes through one country. Relying on one source for 90% of our supply should not be ignored.
+            </p>
+            
+            <svg class="hero-lattice" width="220" height="100" viewBox="0 0 220 100"
+                fill="none" xmlns="http://www.w3.org/2000/svg">
+                <polygon points="70,10 100,10 115,36 100,62 70,62 55,36" stroke="var(--color-gold)" stroke-opacity="0.35" stroke-width="1.2" fill="none" />
+                <polygon points="115,36 145,36 160,62 145,88 115,88 100,62" stroke="var(--color-gold)" stroke-opacity="0.25" stroke-width="1.2" fill="none" />
+                <polygon points="55,36 85,36 100,62 85,88 55,88 40,62" stroke="var(--color-gold)" stroke-opacity="0.20" stroke-width="1.2" fill="none" />
+                <polygon points="100,62 130,62 145,88 130,114 100,114 85,88" stroke="var(--color-gold)" stroke-opacity="0.15" stroke-width="1.2" fill="none" />
+            </svg>
+
+            <!-- key stats -->
+
+            <div class="hero-stats-row">
+                <div class="hero-stat-card">
+                    <div class="hero-stat-number" id="stat-china-share">0%</div>
+                    <div class="hero-stat-label">China share of natural supply</div>
+            </div>
+                <div class="hero-stat-card">
+                    <div class="hero-stat-number" id="stat-global-demand">0Mt</div>
+                    <div class="hero-stat-label">Global demand 2023</div>
+            </div>
+                <div class="hero-stat-card">
+                    <div class="hero-stat-number" id="stat-anode-rank">#1</div>
+                    <div class="hero-stat-label">Battery anode material</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- scroll cue -->
+
+        <div class="scroll-cue">
+            <svg width="32" height="36" viewBox="0 0 32 36" fill="none" stroke="#888780" stroke-width="2" stroke-linecap="round">
+                <polyline points="8,6 16,14 24,6" />
+                <polyline points="8,18 16,26 24,18" />
+            </svg>
+            <span class="scroll-cue-label">Scroll to explore</span>
+        </div>
+    </section>
+
+    <!-- gold separator -->
+
+    <div class="section-separator">
+        <span class="separator-dot" style="background: var(--color-gold)"></span>
+    </div>
+
+    <!-- section 1: primary uses -->
+
+    <section id="section-uses">
+        <div class="section-inner">
+            <div class="two-column">
+                <div class="column-65">
+                    <div class="section-label" style="color: var(--color-gold)">PRIMARY USES</div>
+                    <div class="section-title">Where Graphite Goes</div>
+                    <div class="timeline-wrapper" id="treemap-container"
+                        role="img" aria-label="Treemap of graphite applications by market share">
+                    </div>
+                </div>
+                
+                <div class="column-35 sidebar">
+                    <h2 style="font-family: var(--font-display); font-size: 28px;
+                                color: var(--color-offwhite); font-weight: 700;
+                                margin-bottom: 28px; line-height: 1.2">
+                    Applications Driving Demand
+                    </h2>
+
+                    <p>
+                    <span class="status-dot" style="background: var(--color-gold)"></span>
+                        With EVs and energy storage already claiming 43% of the market, battery production ramping up everywhere will cause a global shift in graphite trade through the 2030s.
+                    </p>
+
+                    <p>
+                    <span class="status-dot" style="background: var(--color-coral)"></span>
+                        About 22% of graphite goes into refractories where it is one of the few materials on Earth that can face 3,000°C heat just fine.
+                    </p>
+
+                    <p>
+                    <span class="status-dot" style="background: var(--color-blue)"></span>
+                        Because of its unique structure, graphite becomes a natural choice for lubricant where it stays friction-free in extreme environments where even grease would fail.
+                    </p>
+
+                    <p>
+                    <span class="status-dot" style="background: var(--color-teal)"></span>
+                        With 8% of the market is dedicated to expandable graphite, the material plays a critical role in keeping buildings safe from fire and overheating.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- coral separator -->
+    <div class="section-separator"> 
+        <span class="separator-dot" style="background: var(--color-coral)"></span> 
+    </div>
+
+    <!-- section 2: supply chain -->
+
+    <section id="section-supply">
+        <div class="section-inner">
+            <div class="section-label" style="color: var(--color-coral)">SUPPLY CHAIN</div>
+            <div class="section-title">Value Chain Concentration</div>
+
+            <div class="sankey-label">MATERIAL FLOW — SOURCE → REFINER → FORM → END USE</div>
+            <div class="sankey-wrapper" id="sankey-container" role="img" aria-label="Sankey diagram of graphite supply chain">
+            </div>
+
+            <div class="reserve-bar-wrapper">
+            <div class="reserve-bar-title">China's dominance across the chain</div>
+
+                <div class="reserve-bar">
+                    <div class="reserve-bar-segment" style="flex: 65; background: #D85A30">
+                        <span class="reserve-bar-segment-number">65%</span>
+                        <span class="reserve-bar-segment-label">Mining</span>
+                    </div>
+                    <div class="reserve-bar-segment" style="flex: 93; background: #a34520">
+                        <span class="reserve-bar-segment-number">93%</span>
+                        <span class="reserve-bar-segment-label">Purification</span>
+                    </div>
+                    <div class="reserve-bar-segment" style="flex: 80; background: #7a3318">
+                        <span class="reserve-bar-segment-number">80%</span>
+                        <span class="reserve-bar-segment-label">Anode Shaping</span>
+                    </div>
+                </div>
+
+                <div class="reserve-bar-callout">&uarr; Highest concentration point</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- teal separator -->
+    <div class="section-separator"> 
+        <span class="separator-dot" style="background: var(--color-teal)"></span> 
+    </div>
+
+    <!-- section 3: US sources -->
+
+    <section id="section-sources">
+        <div class="section-inner">
+            <div class="section-label" style="color: var(--color-teal)">U.S. SOURCES</div>
+            <div class="section-title">Domestic Potential</div>
+
+            <div class="map-layout">
+
+                <div class="map-container">
+                    <div id="leaflet-map"
+                        role="img" aria-label="Map of U.S. graphite deposits">
+                    </div>
+
+                    <div class="map-legend">
+                    <div class="map-legend-item">
+                        <div class="map-legend-swatch" style="background: #EF9F27"></div>
+                        Advanced
+                    </div>
+                    <div class="map-legend-item">
+                        <div class="map-legend-swatch" style="background: #1D9E75"></div>
+                        Exploration
+                    </div>
+                    <div class="map-legend-item">
+                        <div class="map-legend-swatch" style="background: #888780"></div>
+                        Historical
+                    </div>
+                    </div>
+                </div>
+
+                <div class="map-sidebar" id="map-sidebar-panel"></div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- blue separator -->
+    <div class="section-separator"> 
+        <span class="separator-dot" style="background: var(--color-blue)"></span> 
+    </div>
+
+    <!-- section4: lifecycle -->
+
+    <section id="section-lifecycle">
+        <div class="section-inner">
+            <div class="section-label" style="color: var(--color-blue)">LIFECYCLE</div>
+            <div class="section-title">From Mine to Application</div>
+
+            <div class="two-column">
+
+                <div class="column-35">
+                    <div class="legislation-sidebar" id="lifecycle-sidebar"></div>
+                </div>
+
+                <div class="column-65">
+
+                    <div class="cytoscape-legend">
+                        <span class="cytoscape-legend-pill">
+                            <span class="cytoscape-legend-dot" style="background: #888780"></span>Mining
+                        </span>
+
+                        <span class="cytoscape-legend-pill">
+                            <span class="cytoscape-legend-dot" style="background: #EF9F27"></span>Processing
+                        </span>
+
+                        <span class="cytoscape-legend-pill">
+                            <span class="cytoscape-legend-dot" style="background: #378ADD"></span>Product
+                        </span>
+                        
+                        <span class="cytoscape-legend-pill">
+                            <span class="cytoscape-legend-dot" style="background: #1D9E75"></span>End-Use
+                        </span>
+                    </div>
+
+                    <div class="cytoscape-wrapper">
+                    <div class="cytoscape-direction-label">MINE → MARKET</div>
+                        <div id="cytoscape-container"
+                                role="img" aria-label="Technology network graph from mining to end use">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- purple separator -->
+     <div class="section-separator"> 
+        <span class="separator-dot" style="background: var(--color-purple)"></span> 
+    </div>
+
+    <!-- section 5: substitutions -->
+    <section id="section-substitutions">
+        <div class="section-inner">
+            <div class="section-label" style="color: var(--color-purple)">SUBSTITUTIONS</div>
+            <div class="section-title">Alternatives &amp; Efficiency</div>
+
+            <div class="market-tabs" id="metric-tab-group">
+                <button class="market-tab-button active" data-metric="performance">Performance</button>
+                <button class="market-tab-button" data-metric="cost">Cost Index</button>
+                <button class="market-tab-button" data-metric="availability">Availability</button>
+            </div>
+
+            <div id="bar-chart-container"
+                role="img" aria-label="Comparison of graphite vs substitute materials">
+            </div>
+
+            <div class="econ-cards" id="econ-cards-container"></div>
+        </div>
+    </section>
+
+    <!-- footer -->
+    <footer id="footer">
+        <div class="footer-closing">
+            Graphite is one of many unseen criticalities. Despite its importance in energy transition, it remains outside of the control of the nations that need it most.
+        </div>
+
+        <p>
+            Sources: USGS Mineral Commodity Summaries (2023–2024), Benchmark Mineral Intelligence, S&amp;P Global Market Intelligence, Northern Graphite, Graphite One Inc., DOE Critical Materials Assessment.
+        </p>
+
+        <p>
+            Data values seen in this infographic are representative estimates compiled from the publicly available sources listed above for educational purposes.
+        </p>
+
+        <p style="color: var(--color-offwhite); margin-top: 16px">
+            &copy; ORISE Infographic Undergraduate Scholarship Competition 2026
+        </p>
+    </footer>
+
+    <div class="tooltip" id="tooltip"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            /* section registry */
+
+            const sectionIds = [
+                'hero',
+                'section-uses',
+                'section-supply',
+                'section-sources',
+                'section-lifecycle',
+                'section-substitutions'
+            ];
+
+            /* app state */
+
+            const appState = {
+                currentSection: 0,
+                activeMetric: 'performance'
+            };
+
+            /* data */
+            const DATA = {
+
+                /* uses: treemap data 
+                application category | market share | accent color | short decription
+                */
+                uses: [
+                    { name: 'EV / Energy Storage Anodes', value: 43, color: '#EF9F27', desc: 'Li-ion battery anodes for EVs and grid storage' },
+                    { name: 'Refractories & Foundry', value: 22, color: '#D85A30', desc: 'High-temp linings for steelmaking' },
+                    { name: 'Lubricants & Coatings', value: 11, color: '#378ADD', desc: 'Dry lubricants and conductive coatings' },
+                    { name: 'Expandable Graphite', value: 8, color: '#1D9E75', desc: 'Fire retardants, gaskets, thermal management' },
+                    { name: 'Carbon Brushes & Motors', value: 6, color: '#7F77DD', desc: 'Electric motor brushes and contacts' },
+                    { name: 'Pencils & Pigments', value: 5, color: '#888780', desc: 'Writing instruments and pigments' },
+                    { name: 'Nuclear Moderators', value: 3, color: '#D3D1C7', desc: 'Neutron moderators in reactors' },
+                    { name: 'Other', value: 2, color: '#3D3D3A', desc: 'Specialty applications' }
+                ],
+
+                /* sankey flow diagram 
+                node category id:
+                0 = source type
+                1 = refienr
+                2 = product grade
+                3 = end use
+                */
+                sankey: {
+                    nodes: [
+                        { id: 'Natural (Flake)', tier: 0 },
+                        { id: 'Synthetic', tier: 0 },
+                        { id: 'Amorphous', tier: 0 },
+                
+                        { id: 'Chinese Refiners', tier: 1 },
+                        { id: 'Ex-China Refiners', tier: 1 },
+                
+                        { id: 'Battery-grade', tier: 2 },
+                        { id: 'Industrial-grade', tier: 2 },
+                        { id: 'Refractory-grade', tier: 2 },
+                
+                        { id: 'EV Batteries', tier: 3 },
+                        { id: 'Grid Storage', tier: 3 },
+                        { id: 'Steel / Foundry', tier: 3 },
+                        { id: 'Lubricants', tier: 3 },
+                        { id: 'Other End Uses', tier: 3 }
+                    ],
+
+                    links: [
+                        { source: 'Natural (Flake)', target: 'Chinese Refiners', value: 0.52 },
+                        { source: 'Natural (Flake)', target: 'Ex-China Refiners', value: 0.18 },
+                        { source: 'Synthetic', target: 'Chinese Refiners', value: 0.15 },
+                        { source: 'Synthetic', target: 'Ex-China Refiners', value: 0.08 },
+                        { source: 'Amorphous', target: 'Chinese Refiners', value: 0.04 },
+                        { source: 'Amorphous', target: 'Ex-China Refiners', value: 0.03 },
+
+                        { source: 'Chinese Refiners', target: 'Battery-grade', value: 0.42 },
+                        { source: 'Chinese Refiners',  target: 'Industrial-grade', value: 0.18 },
+                        { source: 'Chinese Refiners', target: 'Refractory-grade', value: 0.11 },
+                        { source: 'Ex-China Refiners', target: 'Battery-grade', value: 0.12 },
+                        { source: 'Ex-China Refiners', target: 'Industrial-grade', value: 0.10 },
+                        { source: 'Ex-China Refiners', target: 'Refractory-grade', value: 0.07 },
+
+                        { source: 'Battery-grade', target: 'EV Batteries', value: 0.38 },
+                        { source: 'Battery-grade', target: 'Grid Storage', value: 0.16 },
+                        { source: 'Industrial-grade', target: 'Lubricants', value: 0.11 },
+                        { source: 'Industrial-grade', target: 'Other End Uses', value: 0.17 },
+                        { source: 'Refractory-grade', target: 'Steel / Foundry', value: 0.18 }
+                    ]
+                },
+
+                /* deposits */
+
+                deposits: [
+                    {
+                    name: 'Graphite Creek',
+                    state: 'Alaska',
+                    type: 'flake',
+                    status: 'advanced',
+                    lat: 65.0, lng: -164.7,
+                    tonnage: '~10.2 Mt graphitic carbon',
+                    notes: 'One of the largest known graphite deposits globally. Graphite One Inc., with the support of the DOE, advances toward full feasibility.'
+                    },
+
+                    {
+                    name: 'Coosa',
+                    state: 'Alabama',
+                    type: 'flake',
+                    status: 'advanced',
+                    lat: 33.1, lng: -86.3,
+                    tonnage: '~78 Mt total resource (4.3% Cg)',
+                    notes: 'Westwater Resources, with DOE funding under the Bipartisan Infrastructure Law, is constructing a processing plant.'
+                    },
+                    {
+                    name: 'Asbury',
+                    state: 'New Jersey',
+                    type: 'flake',
+                    status: 'historical',
+                    lat: 40.7, lng: -74.6,
+                    tonnage: 'Historically mined; limited data',
+                    notes: 'One of the earliest U.S. graphite mines, operated in the 19th century. Currently inactive.'
+                    },
+
+                    {
+                    name: 'Bald Knob',
+                    state: 'Arkansas',
+                    type: 'amorphous',
+                    status: 'historical',
+                    lat: 35.3, lng: -92.0,
+                    tonnage: 'Small-scale historical production',
+                    notes: 'Amorphous graphite occurrences mined intermittently in the early 20th century.'
+                    },
+
+                    {
+                    name: 'Burnet County',
+                    state: 'Texas',
+                    type: 'flake',
+                    status: 'exploration',
+                    lat: 30.7, lng: -98.2,
+                    tonnage: 'Under evaluation',
+                    notes: 'Flake graphite in Precambrian metamorphic rocks. Early-stage exploration.'
+                    },
+                    {
+                    name: 'Montana Deposits',
+                    state: 'Montana',
+                    type: 'flake',
+                    status: 'exploration',
+                    lat: 45.2, lng: -112.6,
+                    tonnage: 'Under evaluation',
+                    notes: 'Multiple flake graphite prospects in the Dillon and Ruby Range areas.'
+                    },
+
+                    {
+                    name: 'Pennsylvania',
+                    state: 'Pennsylvania',
+                    type: 'amorphous',
+                    status: 'historical',
+                    lat: 40.0, lng: -75.6,
+                    tonnage: 'Historically significant',
+                    notes: 'Chester County area produced amorphous graphite through the mid-20th century.'
+                    },
+
+                    {
+                    name: 'SW Virginia',
+                    state: 'Virginia',
+                    type: 'flake',
+                    status: 'exploration',
+                    lat: 37.0, lng: -80.4,
+                    tonnage: 'Under evaluation',
+                    notes: 'Flake graphite in the Blue Ridge metamorphic belt. Limited modern data.'
+                    }
+                ],
+
+                /* lifecycle */
+
+                lifecycle: {
+                    nodes: [
+                    { id: 'opm', label: 'Open-pit Mining', group: 'mining' },
+                    { id: 'ugm', label: 'Underground Mining', group: 'mining' },
+                    { id: 'isr', label: 'In-situ Recovery',  group: 'mining' },
+
+                    { id: 'flo', label: 'Flotation', group: 'processing' },
+                    { id: 'thp', label: 'Thermal Purification', group: 'processing' },
+                    { id: 'chp', label: 'Chemical Purification', group: 'processing' },
+                    { id: 'mec', label: 'Mechanical Milling', group: 'processing' },
+
+                    { id: 'sph', label: 'Spherical Graphite', group: 'product' },
+                    { id: 'flk', label: 'Flake Graphite', group: 'product' },
+                    { id: 'exp', label: 'Expanded Graphite', group: 'product' },
+                    { id: 'gro', label: 'Graphene Oxide', group: 'product' },
+
+                    { id: 'lia', label: 'Li-ion Anode', group: 'end-use' },
+                    { id: 'ref', label: 'Refractory Brick', group: 'end-use' },
+                    { id: 'lub', label: 'Lubricant Base', group: 'end-use' },
+                    { id: 'nuc', label: 'Nuclear Moderator', group: 'end-use' }
+                    ],
+
+                    edges: [
+                    { source: 'opm', target: 'flo' },
+                    { source: 'opm', target: 'mec' },
+                    { source: 'ugm', target: 'flo' },
+                    { source: 'ugm', target: 'thp' },
+                    { source: 'isr', target: 'chp' },
+                    { source: 'isr', target: 'flo' },
+
+                    { source: 'flo', target: 'flk' },
+                    { source: 'flo', target: 'sph' },
+                    { source: 'thp', target: 'sph' },
+                    { source: 'thp', target: 'exp' },
+                    { source: 'chp', target: 'sph' },
+                    { source: 'chp', target: 'gro' },
+                    { source: 'mec', target: 'flk' },
+                    { source: 'mec', target: 'exp' },
+
+                    { source: 'sph', target: 'lia' },
+                    { source: 'flk', target: 'ref' },
+                    { source: 'flk', target: 'lub' },
+                    { source: 'exp', target: 'ref' },
+                    { source: 'exp', target: 'nuc' },
+                    { source: 'gro', target: 'lia' },
+                    { source: 'flk', target: 'nuc' }
+                    ],
+
+                    /* detailed descriptions */
+                    descriptions: {
+                    opm: 'Large-scale surface extraction for near-surface deposits. Despite its cost-effectiveness, it leads to significant land disturbance from high-volume operations.',
+                    ugm: 'Subsurface mining for deeper deposits. Higher cost per tonne but smaller surface footprint.',
+                    isr: 'Emerging technique using chemical solutions to extract graphite in-situ. Minimal surface disturbance but still highly experimental.',
+                    flo: 'Froth flotation separates graphite from gangue minerals using hydrophobic properties. Achieves 85–95% carbon content.',
+                    thp: 'Treatment above 2,500°C to achieve 99.95%+ purity. Energy-intensive but produces the highest grades for battery anodes.',
+                    chp: 'Acid leaching and chemical treatment. Lower temperature than thermal methods but generates waste requiring management.',
+                    mec: 'Grinding and classification for sized products. Used where ultra-high purity is not required.',
+                    sph: 'Rounded particles optimized for lithium-ion anodes. Requires precision shaping, coating, and purification but produces the highest value form of graphite.',
+                    flk: 'Natural flake products in various mesh sizes. The most versatile feedstock for refractories, lubricants, and spherical graphite production.',
+                    exp: 'Heat-treated graphite expanding up to 300\u00d7 volume. Used in fire retardancy, thermal gaskets, and flexible foil.',
+                    gro: 'Chemically exfoliated graphite sheets that leads to graphene-based advanced materials.',
+                    lia: 'Primary anode material in lithium-ion cells. Stores lithium ions through intercalation between carbon layers during charging.',
+                    ref: 'High-temperature linings for furnaces and ladles in steelmaking. Withstands temperatures exceeding 3,000°C.',
+                    lub: 'Solid lubricant for extreme conditions such as vacuum, high temperature, corrosive environments (where liquids fail).',
+                    nuc: 'Slows fast neutrons to thermal energies in nuclear reactors, sustaining controlled fission. Used since the earliest reactor designs.'
+                    }
+                },
+
+                /* substitutions */
+
+                substitutions: [
+                    {
+                    category: 'Battery Anodes',
+                    items: [
+                        { name: 'Graphite', performance: 92, cost: 85, availability: 55, isGraphite: true },
+                        { name: 'Silicon-dominant', performance: 96, cost: 40, availability: 72, isGraphite: false },
+                        { name: 'Hard Carbon', performance: 68, cost: 72, availability: 82, isGraphite: false }
+                    ]
+                    },
+                    {
+                    category: 'Lubricants',
+                    items: [
+                        { name: 'Graphite', performance: 88, cost: 78, availability: 58, isGraphite: true },
+                        { name: 'MoS\u2082', performance: 84, cost: 52, availability: 70, isGraphite: false },
+                        { name: 'PTFE', performance: 76, cost: 65, availability: 90, isGraphite: false }
+                    ]
+                    },
+                    {
+                    category: 'Refractories',
+                    items: [
+                        { name: 'Graphite', performance: 90, cost: 68, availability: 52, isGraphite: true },
+                        { name: 'Magnesia', performance: 80, cost: 82, availability: 88, isGraphite: false },
+                        { name: 'Alumina', performance: 74, cost: 86, availability: 92, isGraphite: false }
+                    ]
+                    },
+                    {
+                    category: 'Nuclear Moderators',
+                    items: [
+                        { name: 'Graphite', performance: 85, cost: 75, availability: 55, isGraphite: true },
+                        { name: 'Heavy Water', performance: 92, cost: 38, availability: 65, isGraphite: false },
+                        { name: 'Beryllium', performance: 78, cost: 28, availability: 42, isGraphite: false }
+                    ]
+                    }
+                ],
+
+                /* efficiency */
+
+                efficiencyStats: [
+                { number: '30%', label: 'Yield improvement via flotation optimisation', source: 'Benchmark Mineral Intelligence, 2023' },
+                { number: '15%', label: 'Anode material reduction via coating tech', source: 'DOE Vehicle Technologies Office' },
+                { number: '2\u00d7', label: 'Lifespan gain with purified synthetic grades', source: 'S&P Global Market Intelligence' },
+                { number: '40%', label: 'Recycling recovery rate (emerging processes)', source: 'Argonne National Laboratory, 2024' }
+                ]
+
+                };
+
+                /* hex grid*/
+
+                (function buildHexGrid() {
+                    const svgNS = 'http://www.w3.org/2000/svg';
+                    const svg = document.createElementNS(svgNS,'svg');
+
+                    const gridWidth = Math.max(window.innerWidth, 1400);
+                    const gridHeight = Math.max(6000, document.documentElement.scrollHeight);
+                
+                    svg.setAttribute('width', gridWidth);
+                    svg.setAttribute('height', gridHeight);
+                    svg.setAttribute('viewBox', `0 0 ${gridWidth} ${gridHeight}`);
+                    svg.style.cssText = 'position:absolute; top:0; left:50%; transform:translateX(-50%)';
+                
+                    document.getElementById('hex-background').appendChild(svg);
+                
+                    const hexRadius = 28;
+                    const columnStep = hexRadius * Math.sqrt(3);
+                    const rowStep = hexRadius * 1.5;
+                    const totalCols = Math.ceil(gridWidth / columnStep) + 4;
+                    const totalRows = Math.ceil(gridHeight / rowStep) + 4;
+                
+                    const allHexElements = [];
+                
+                    for (let row = -2; row < totalRows; row++) {
+                        for (let col = -2; col < totalCols; col++) {
+                            const centerX = col * columnStep + (row % 2 ? columnStep / 2 : 0);
+                            const centerY = row * rowStep;
+                    
+                            const points = [];
+                            for (let vertex = 0; vertex < 6; vertex++) {
+                                const angle = (Math.PI / 3) * vertex - Math.PI / 6;
+                                const px = (centerX + hexRadius * Math.cos(angle)).toFixed(1);
+                                const py = (centerY + hexRadius * Math.sin(angle)).toFixed(1);
+                                points.push(`${px},${py}`);
+                            }
+                    
+                            const polygon = document.createElementNS(svgNS, 'polygon');
+                            polygon.setAttribute('points', points.join(' '));
+                            polygon.setAttribute('fill', 'none');
+                            polygon.setAttribute('stroke', 'rgba(255, 255, 255, 0.055)');
+                            polygon.setAttribute('stroke-width', '0.5');
+                    
+                            svg.appendChild(polygon);
+                            allHexElements.push(polygon);
+                        }
+                    }
+                
+                    function pulseRandomHexes() {
+                        const count = 12 + Math.floor(Math.random() * 7);
+                    
+                        for (let i = 0; i < count; i++) {
+                            const hex = allHexElements[Math.floor(Math.random() * allHexElements.length)];
+                            const duration = (3 + Math.random() * 3).toFixed(1);
+                    
+                            hex.style.animation = `hex-pulse ${duration}s ease-in-out 1`;
+                            hex.addEventListener('animationend', () => {
+                            hex.style.animation = '';
+                            }, { once: true });
+                        }
+                    }
+                
+                    pulseRandomHexes();
+                    setInterval(pulseRandomHexes, 8000);
+                })();
+
+                /* navigation */
+
+                const navDots = document.querySelectorAll('.nav-dot');
+                
+                const sectionObserver = new IntersectionObserver(entries => {
+                    entries.forEach(entry => {
+                        if (!entry.isIntersecting) return;
+                    
+                        const sectionIndex = sectionIds.indexOf(entry.target.id);
+                        if (sectionIndex < 0) return;
+                    
+                        appState.currentSection = sectionIndex;
+                        navDots.forEach((dot, i) => {
+                            dot.classList.toggle('active', i === sectionIndex);
+                        });
+                    });
+                }, { threshold: 0.3 });
+                
+                sectionIds.forEach(id => {
+                    sectionObserver.observe(document.getElementById(id));
+                });
+                
+                navDots.forEach(dot => {
+                    dot.addEventListener('click', () => {
+                    const targetId = sectionIds[Number(dot.dataset.index)];
+                    document.getElementById(targetId).scrollIntoView({ behavior: 'smooth' });
+                    });
+                });
+
+                /* lazy init */ 
+
+                const initializedSections = {};
+ 
+                const lazyObserver = new IntersectionObserver(entries => {
+                    entries.forEach(entry => {
+                    if (!entry.isIntersecting) return;
+                
+                    const id = entry.target.id;
+                    if (initializedSections[id]) return;
+                    initializedSections[id] = true;
+                
+                    if (id === 'section-uses') initTreemap();
+                    if (id === 'section-supply') initSankey();
+                    if (id === 'section-sources') initMap();
+                    if (id === 'section-lifecycle') initCytoscape();
+                    if (id === 'section-substitutions') initSubstitutions();
+                    });
+                }, { rootMargin: '200px' });
+                
+                sectionIds.slice(1).forEach(id => {
+                    lazyObserver.observe(document.getElementById(id));
+                });
+
+                /* countup */
+
+                function initCountUp() {
+                    const CountUp = (window.countUp && window.countUp.CountUp) || window.CountUp;
+                
+                    if (!CountUp) {
+                        setTimeout(initCountUp, 300);
+                        return;
+                    }
+                
+                    new CountUp('stat-china-share', 65, {
+                        suffix: '%', duration: 1.8, useEasing: true
+                    }).start();
+                
+                    new CountUp('stat-global-demand', 1.1, {
+                        suffix: 'Mt', decimalPlaces: 1, duration: 1.8, useEasing: true
+                    }).start();
+                }
+                
+                setTimeout(initCountUp, 600);
+
+                /* gsap */
+
+                function initScrollAnimations() {
+                    if (typeof gsap === 'undefined') {
+                        setTimeout(initScrollAnimations, 300);
+                        return;
+                    }
+                
+                    gsap.registerPlugin(ScrollTrigger);
+                
+                    const entranceConfig = {
+                        opacity: 0,
+                        scale: 0.88,
+                        ease: 'cubic-bezier(0.16, 1, 0.3, 1)',
+                        transformOrigin: 'center'
+                    };
+                
+                    document.querySelectorAll('.section-label').forEach(el => {
+                        gsap.from(el, {
+                            ...entranceConfig,
+                            duration: 0.5,
+                            scrollTrigger: { trigger: el, start: 'top 85%' }
+                        });
+                    });
+                
+                    document.querySelectorAll('.section-title').forEach(el => {
+                        gsap.from(el, {
+                            ...entranceConfig,
+                            duration: 0.6,
+                            delay: 0.08,
+                            scrollTrigger: { trigger: el, start: 'top 85%' }
+                        });
+                    });
+                }
+                
+                setTimeout(initScrollAnimations, 500);
+
+                /* tooltip */
+
+                const tooltipEl = document.getElementById('tooltip');
+                
+                function showTooltip(mouseX, mouseY, htmlContent) {
+                    tooltipEl.innerHTML = htmlContent;
+                    tooltipEl.style.left = Math.min(mouseX + 14, window.innerWidth - 260) + 'px';
+                    tooltipEl.style.top = (mouseY - 12) + 'px';
+                    tooltipEl.style.opacity = '1';
+                }
+                
+                function hideTooltip() {
+                    tooltipEl.style.opacity = '0';
+                }
+
+                /* section 1 treemap */
+                function initTreemap() {
+                    const container      = document.getElementById('treemap-container');
+                    const containerWidth = container.clientWidth || 700;
+                    const containerHeight = Math.round(containerWidth * 10 / 16);
+                
+                    const svg = d3.select(container)
+                    .append('svg')
+                    .attr('viewBox', `0 0 ${containerWidth} ${containerHeight}`);
+                
+                    const root = d3.hierarchy({ children: DATA.uses }).sum(d => d.value);
+                    d3.treemap()
+                    .size([containerWidth, containerHeight])
+                    .padding(3)
+                    .round(true)(root);
+                
+                    const cells = svg.selectAll('g')
+                    .data(root.leaves())
+                    .join('g')
+                    .attr('transform', d => `translate(${d.x0}, ${d.y0})`);
+                
+                    cells.append('rect')
+                    .attr('width',  d => d.x1 - d.x0)
+                    .attr('height', d => d.y1 - d.y0)
+                    .attr('rx', 3)
+                    .attr('fill', d => {
+                        const color = d3.color(d.data.color);
+                        color.opacity = 0.18;
+                        return color + '';
+                    })
+                    .attr('stroke', d => {
+                        const color = d3.color(d.data.color);
+                        color.opacity = 0.7;
+                        return color + '';
+                    })
+                    .attr('stroke-width', 1)
+                    .style('cursor', 'pointer')
+                
+                    .on('mouseenter', function (event, d) {
+                        d3.select(this).transition().duration(120).attr('fill', () => {
+                            const color = d3.color(d.data.color);
+                            color.opacity = 0.35;
+                            return color + '';
+                        });
+                        showTooltip(
+                            event.clientX, event.clientY,
+                            `<div class="tooltip-title">${d.data.name}</div>` +
+                            `<div class="tooltip-value">${d.data.value}%</div>` +
+                            `<div class="tooltip-detail">${d.data.desc}</div>`
+                        );
+                    })
+                    .on('mousemove', event => {
+                        tooltipEl.style.left = Math.min(event.clientX + 14, window.innerWidth - 260) + 'px';
+                        tooltipEl.style.top  = (event.clientY - 12) + 'px';
+                    })
+                    .on('mouseleave', function (event, d) {
+                        d3.select(this).transition().duration(120).attr('fill', () => {
+                            const color = d3.color(d.data.color);
+                            color.opacity = 0.18;
+                            return color + '';
+                        });
+                        hideTooltip();
+                    });
+                
+                    cells.each(function (d) {
+                    const cellWidth  = d.x1 - d.x0;
+                    const cellHeight = d.y1 - d.y0;
+                
+                    if (cellWidth < 80 || cellHeight < 40) return;
+                
+                    const foreignObj = d3.select(this)
+                        .append('foreignObject')
+                        .attr('width', cellWidth  - 10)
+                        .attr('height', cellHeight - 10)
+                        .attr('x', 5)
+                        .attr('y', 5)
+                        .style('pointer-events', 'none');
+                
+                    foreignObj.append('xhtml:div')
+                        .style('font-family', 'var(--font-body)')
+                        .style('font-size', '12px')
+                        .style('font-weight', '400')
+                        .style('color', 'var(--color-offwhite)')
+                        .style('line-height', '1.35')
+                        .style('overflow', 'hidden')
+                        .style('height', '100%')
+                        .html(
+                        `${d.data.name}<br>` +
+                        `<span style="font-family:var(--font-mono); font-size:11px; color:${d.data.color}">${d.data.value}%</span>`
+                        );
+                    });
+                
+                    if ( typeof gsap !== 'undefined') {
+                        cells
+                            .style('opacity', 0)
+                            .style('transform-origin', 'center')
+                            .style('transform', 'scale(0.85)');
+                    
+                        cells.each(function (d, i) {
+                            gsap.to(this, {
+                                opacity: 1,
+                                scale: 1,
+                                duration: 0.55,
+                                delay: i * 0.055,
+                                ease: 'cubic-bezier(0.16, 1, 0.3, 1)'
+                            });
+                        });
+                    }
+                }
+
+                /* section 2  sankey diagram */
+
+                function initSankey() {
+                    const container = document.getElementById('sankey-container');
+                    const containerWidth = container.clientWidth || 1000;
+                    const containerHeight = 460;
+                
+                    const svg = d3.select(container)
+                    .append('svg')
+                    .attr('viewBox', `0 0 ${containerWidth} ${containerHeight}`);
+                
+                    const nodeIndexMap = {};
+                    DATA.sankey.nodes.forEach((node, i) => { nodeIndexMap[node.id] = i; });
+                
+                    const tierColors = ['#888780', '#D85A30', '#EF9F27', '#378ADD'];
+                
+                    const graph = {
+                        nodes: DATA.sankey.nodes.map((node, i) => ({
+                            ...node,
+                            index: i,
+                            tier: node.tier
+                        })),
+                        links: DATA.sankey.links.map(link => ({
+                            source: nodeIndexMap[link.source],
+                            target: nodeIndexMap[link.target],
+                            value: link.value
+                        }))
+                    };
+                
+                    const sankeyLayout = d3.sankey()
+                    .nodeId(d => d.index)
+                    .nodeWidth(12)
+                    .nodePadding(16)
+                    .extent([[50, 20], [containerWidth - 50, containerHeight - 20]]);
+                
+                    const { nodes, links } = sankeyLayout(graph);
+                
+                    const defs = svg.append('defs');
+                
+                    links.forEach((link, i) => {
+                        const gradient = defs.append('linearGradient')
+                            .attr('id', `sankey-gradient-${i}`)
+                            .attr('gradientUnits', 'userSpaceOnUse')
+                            .attr('x1', link.source.x1)
+                            .attr('x2', link.target.x0);
+                    
+                        gradient.append('stop')
+                            .attr('offset', '0%')
+                            .attr('stop-color', tierColors[link.source.tier] || '#888');
+                    
+                        gradient.append('stop')
+                            .attr('offset', '100%')
+                            .attr('stop-color', tierColors[link.target.tier] || '#888');
+                    });
+                
+                    const linkElements = svg.append('g')
+                    .selectAll('path')
+                    .data(links)
+                    .join('path')
+                    .attr('d', d3.sankeyLinkHorizontal())
+                    .attr('fill', 'none')
+                    .attr('stroke', (d, i) => `url(#sankey-gradient-${i})`)
+                    .attr('stroke-opacity', 0.22)
+                    .attr('stroke-width', d => Math.max(1, d.width))
+                    .style('cursor', 'pointer')
+                    .on('mouseenter', function () {
+                        d3.select(this).attr('stroke-opacity', 0.55);
+                    })
+                    .on('mouseleave', function () {
+                        d3.select(this).attr('stroke-opacity', 0.22);
+                    });
+                
+                    svg.append('g')
+                    .selectAll('rect')
+                    .data(nodes)
+                    .join('rect')
+                    .attr('x',  d => d.x0)
+                    .attr('y', d => d.y0)
+                    .attr('width', d => d.x1 - d.x0)
+                    .attr('height', d => Math.max(1, d.y1 - d.y0))
+                    .attr('fill', d => tierColors[d.tier] || '#888')
+                    .attr('rx', 2)
+                    .style('cursor', 'pointer')
+
+                    .on('mouseenter', function (event, hoveredNode) {
+                        linkElements.attr('stroke-opacity', link =>
+                        (link.source === hoveredNode || link.target === hoveredNode) ? 0.7 : 0.06
+                        );
+                    })
+                    .on('mouseleave', () => {
+                        linkElements.attr('stroke-opacity', 0.22);
+                    });
+                
+                    svg.append('g')
+                    .selectAll('text')
+                    .data(nodes)
+                    .join('text')
+                    .attr('x', d => d.x0 < containerWidth / 2 ? d.x1 + 8 : d.x0 - 8)
+                    .attr('y', d => (d.y0 + d.y1) / 2)
+                    .attr('dy', '0.35em')
+                    .attr('text-anchor', d => d.x0 < containerWidth / 2 ? 'start' : 'end')
+                    .attr('fill', '#D3D1C7')
+                    .attr('font-family', 'var(--font-mono)')
+                    .attr('font-size', '12px')
+                    .text(d => d.id);
+                
+                    if (typeof gsap !== 'undefined') {
+                        linkElements.each(function () {
+                            const totalLength = this.getTotalLength();
+                            d3.select(this)
+                            .attr('stroke-dasharray', totalLength)
+                            .attr('stroke-dashoffset', totalLength);
+                        });
+                    
+                        gsap.to(linkElements.nodes(), {
+                            strokeDashoffset: 0,
+                            duration: 1.4,
+                            ease: 'power2.out',
+                            stagger: 0.03,
+                            scrollTrigger: {
+                                trigger: '#section-supply',
+                                start: 'top 70%'
+                            }
+                        });
+                    }
+                }
+
+                /* leaflet map */
+                function initMap() {
+                    const sidebarEl = document.getElementById('map-sidebar-panel');
+                
+                    const statusColors = {
+                        advanced:    '#EF9F27',
+                        exploration: '#1D9E75',
+                        historical:  '#888780'
+                    };
+                
+                    const statusLabels = {
+                        advanced:    'Advanced',
+                        exploration: 'Exploration',
+                        historical:  'Historical'
+                    };
+                
+                    function showDefaultSidebar() {
+                    sidebarEl.innerHTML =
+                        '<h3>The Domestic Opportunity</h3>' +
+                
+                        '<p style="font-family: var(--font-mono); font-size: 26px; ' +
+                        'color: var(--color-teal); margin-bottom: 4px; font-weight: 400">' +
+                        '~3.1 Mt</p>' +
+                
+                        '<p style="font-size: 13px; color: var(--color-mid-gray); ' +
+                        'margin-bottom: 20px; font-weight: 400">' +
+                        'Total identified U.S. graphite resource</p>' +
+                
+                        
+
+                        '<p>The United States holds significant graphite resources that ' +
+                        'remain largely undeveloped. Two advanced-stage projects, which are ' +
+                        'the Graphite Creek in Alaska and Coosa in Alabama, are moving ' +
+                        'toward production with federal support under the Bipartisan ' +
+                        'Infrastructure Law.</p>' +
+                
+                        '<p>Domestic production like this may meaningfully reduce ' +
+                        'the critical dependency on Chinese refining that currently defines ' +
+                        'the global supply chain.</p>' +
+                
+                        '<p class="data-caption" style="margin-top: auto">' +
+                        'Designated a U.S. critical mineral by USGS, 2022.</p>';
+                    }
+                
+                    showDefaultSidebar();
+                
+                    const map = L.map('leaflet-map', {
+                        scrollWheelZoom:    false,
+                        attributionControl: false
+                    }).setView([39.5, -98.35], 4);
+                
+                    L.tileLayer(
+                        'https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_nolabels/{z}/{x}/{y}.png',
+                        { maxZoom: 10 }
+                    ).addTo(map);
+                
+                    DATA.deposits.forEach(deposit => {
+                        const isLargestDeposit = (deposit.name === 'Graphite Creek');
+                        const markerRadius = isLargestDeposit ? 14 : 10;
+                        const markerColor = statusColors[deposit.status];
+                    
+                        L.circleMarker([deposit.lat, deposit.lng], {
+                            radius: markerRadius,
+                            fillColor: markerColor,
+                            fillOpacity: 0.8,
+                            color: '#fff',
+                            weight: 1.5
+                        })
+                            .addTo(map)
+                            .bindTooltip(deposit.name, {
+                            direction: 'top',
+                            className: 'leaflet-tt'
+                            })
+                            .on('click', () => {
+                            sidebarEl.style.opacity = '0';
+                    
+                            setTimeout(() => {
+                                sidebarEl.innerHTML =
+                                '<div class="deposit-badge" style="background: ' + markerColor + '22; ' +
+                                'color: ' + markerColor + '">' +
+                                '<span class="deposit-badge-dot" style="background: ' + markerColor + '"></span>' +
+                                statusLabels[deposit.status].toUpperCase() +
+                                '</div>' +
+                    
+                                '<h3>' + deposit.name +
+                                '<span class="deposit-type-pill">' + deposit.type + '</span></h3>' +
+                    
+                                '<p style="font-family: var(--font-mono); font-size: 13px; ' +
+                                'color: var(--color-mid-gray); margin-bottom: 4px; font-weight: 400">' +
+                                deposit.state + '</p>' +
+                    
+                                '<p style="font-family: var(--font-mono); font-size: 20px; ' +
+                                'color: var(--color-teal); margin: 10px 0; font-weight: 400">' +
+                                deposit.tonnage + '</p>' +
+                    
+                                '<hr class="deposit-divider">' +
+                    
+                                '<p>' + deposit.notes + '</p>';
+                    
+                                const backButton = document.createElement('button');
+                                backButton.className   = 'button-outline';
+                                backButton.textContent = '\u2190 All deposits';
+                                backButton.addEventListener('click', () => {
+                                    showDefaultSidebar();
+                                    sidebarEl.style.opacity = '1';
+                                });
+                    
+                                sidebarEl.appendChild(backButton);
+                                sidebarEl.style.opacity = '1';
+                            }, 200);
+                        });
+                    });
+                }
+
+                /* cytoscape graph */
+
+                function initCytoscape() {
+                    if (typeof cytoscape === 'undefined') return;
+                
+                    try {
+                        if (typeof cytoscapeDagre !== 'undefined') {
+                            cytoscape.use(cytoscapeDagre);
+                        }
+                    } catch (e) { }
+                
+                    const groupColors = {
+                        'mining':     '#888780',
+                        'processing': '#EF9F27',
+                        'product':    '#378ADD',
+                        'end-use':    '#1D9E75'
+                    };
+                
+                    const cytoscapeElements = [];
+                
+                    DATA.lifecycle.nodes.forEach(node => {
+                        cytoscapeElements.push({
+                            data: {
+                            id:    node.id,
+                            label: node.label,
+                            group: node.group
+                            }
+                        });
+                    });
+                
+                    DATA.lifecycle.edges.forEach(edge => {
+                        cytoscapeElements.push({
+                            data: {
+                            source: edge.source,
+                            target: edge.target
+                            }
+                        });
+                    });
+                
+                    const cy = cytoscape({
+                    container: document.getElementById('cytoscape-container'),
+                    elements:  cytoscapeElements,
+                
+                    style: [
+                        {
+                        selector: 'node',
+                        style: {
+                            'background-color': el => groupColors[el.data('group')] || '#888',
+                            'shape': 'roundrectangle',
+                            'width': 'label',
+                            'height': 34,
+                            'padding': '14px',
+                            'label': 'data(label)',
+                            'font-family': 'Barlow, sans-serif',
+                            'font-size': '11px',
+                            'color': '#F1EFE8',
+                            'text-valign': 'center',
+                            'text-halign': 'center',
+                            'text-wrap': 'wrap',
+                            'text-max-width': '100px',
+                            'border-width': 0
+                        }
+                        },
+                        
+                        {
+                            selector: 'node:selected',
+                            style: {
+                                'border-width': 2,
+                                'border-color': '#EF9F27'
+                            }
+                        },
+                        {
+                        selector: 'edge',
+                        style: {
+                            'line-color': 'rgba(255, 255, 255, 0.1)',
+                            'target-arrow-color': 'rgba(255, 255, 255, 0.1)',
+                            'target-arrow-shape': 'triangle',
+                            'curve-style': 'bezier',
+                            'width': 1.5
+                        }
+                        }
+                    ],
+                
+                    layout: {
+                        name: 'dagre',
+                        rankDir: 'LR',
+                        nodeSep: 40,
+                        rankSep: 80,
+                        edgeSep: 12
+                    },
+                
+                    userZoomingEnabled: false,
+                    userPanningEnabled: true,
+                    boxSelectionEnabled: false
+                    });
+                
+                    const lifecycleSidebar = document.getElementById('lifecycle-sidebar');
+                
+                    const dimmedEdgeStyle = {
+                    'line-color': 'rgba(255, 255, 255, 0.1)',
+                    'target-arrow-color': 'rgba(255, 255, 255, 0.1)'
+                    };
+                
+                    const highlightedEdgeStyle = {
+                    opacity: 0.8,
+                    'line-color': 'rgba(255, 255, 255, 0.45)',
+                    'target-arrow-color': 'rgba(255, 255, 255, 0.45)'
+                    };
+                
+                    function showNodeDetail(nodeId) {
+                        const nodeData = DATA.lifecycle.nodes.find(n => n.id === nodeId);
+                        if (!nodeData) return;
+                    
+                        const description = DATA.lifecycle.descriptions[nodeId] || '';
+                    
+                        lifecycleSidebar.innerHTML =
+                            '<div class="governance-badge" style="background: ' +
+                            groupColors[nodeData.group] + '">' +
+                            nodeData.group.toUpperCase() +
+                            '</div>' +
+                            '<h3>' + nodeData.label + '</h3>' +
+                            '<p>' + description + '</p>';
+                    
+                        const overviewButton = document.createElement('button');
+                        overviewButton.className   = 'button-outline';
+                        overviewButton.textContent = '\u2190 Overview';
+                        overviewButton.addEventListener('click', () => {
+                            showDefaultLifecycleSidebar();
+                            cy.elements().style({ opacity: 1, ...dimmedEdgeStyle });
+                        });
+                    
+                        lifecycleSidebar.appendChild(overviewButton);
+                    }
+                
+                    function showDefaultLifecycleSidebar() {
+                    lifecycleSidebar.innerHTML =
+                        '<h3>Processing Complexity</h3>' +
+                        '<p>Graphite undergoes a chain of extraction, ' +
+                        'beneficiation, and form-factor conversion. Each path through ' +
+                        'the network represents a distinct production route with ' +
+                        'different cost, purity, and environmental profiles.</p>' +
+                        '<p class="data-caption">Tap any node to explore that ' +
+                        'technology or stage.</p>';
+                    }
+                
+                    showDefaultLifecycleSidebar();
+                
+                    cy.on('tap', 'node', function (event) {
+                        const tappedNode = event.target;
+                    
+                        cy.elements().style({ opacity: 0.2, ...dimmedEdgeStyle });
+                    
+                        tappedNode.style({ opacity: 1 });
+                        tappedNode.connectedEdges().style(highlightedEdgeStyle);
+                        tappedNode.connectedEdges().connectedNodes().style({ opacity: 1 });
+                    
+                        showNodeDetail(tappedNode.data().id);
+                    });
+                
+                    cy.on('tap', function (event) {
+                        if (event.target !== cy) return; 
+                    
+                        cy.elements().style({ opacity: 1, ...dimmedEdgeStyle });
+                        showDefaultLifecycleSidebar();
+                    });
+                }
+
+                /* substitution initialization */  
+
+                const SUBSTITUTE_COLOR = '#5B8FA8';
+                
+                function initSubstitutions() {
+                    renderBarCharts();
+                    renderEfficiencyCards();
+                
+                    document.querySelectorAll('.market-tab-button').forEach(button => {
+                        button.addEventListener('click', () => {
+                            document.querySelectorAll('.market-tab-button').forEach(btn => {
+                                btn.classList.remove('active');
+                            });
+                            button.classList.add('active');
+                    
+                            appState.activeMetric = button.dataset.metric;
+                            renderBarCharts();
+                        });
+                    });
+                }
+
+                /* bar chart rendering */
+                function renderBarCharts() {
+                    const metric = appState.activeMetric;
+                
+                    const metricLabels = {
+                        performance: 'Performance Score (0\u2013100)',
+                        cost: 'Cost Competitiveness (0\u2013100)',
+                        availability: 'Supply Availability (0\u2013100)'
+                    };
+                
+                    const metricKeys = {
+                        performance: 'performance',
+                        cost: 'cost',
+                        availability: 'availability'
+                    };
+                
+                    const container = document.getElementById('bar-chart-container');
+                    container.innerHTML = '';
+                
+                    const metricHeading = document.createElement('div');
+                    metricHeading.style.cssText =
+                    'font-family: var(--font-mono); font-size: 11px; ' +
+                    'color: var(--color-mid-gray); margin-bottom: 20px';
+                    metricHeading.textContent = metricLabels[metric] || '';
+                    container.appendChild(metricHeading);
+                
+                    DATA.substitutions.forEach(category => {
+                    const groupEl = document.createElement('div');
+                    groupEl.className = 'bar-group';
+                    groupEl.innerHTML = '<div class="bar-group-label">' + category.category + '</div>';
+                
+                    category.items.forEach((item, index) => {
+                        const score = item[metricKeys[metric]];
+                        const barColor = item.isGraphite ? 'var(--color-gold)' : SUBSTITUTE_COLOR;
+                
+                        const row = document.createElement('div');
+                        row.className = 'bar-row';
+                        row.innerHTML =
+                        '<div class="bar-label">' + item.name + '</div>' +
+                        '<div class="bar-track">' +
+                            '<div class="bar-fill" style="width: 0%; background: ' + barColor + '">' +
+                            score +
+                            '</div>' +
+                        '</div>';
+                
+                        groupEl.appendChild(row);
+                
+                        requestAnimationFrame(() => {
+                            setTimeout(() => {
+                                row.querySelector('.bar-fill').style.width = score + '%';
+                            }, 60 + index * 80);
+                        });
+                    });
+                
+                    container.appendChild(groupEl);
+                    });
+                
+                    const scaleEl = document.createElement('div');
+                    scaleEl.className = 'bar-scale';
+                    scaleEl.innerHTML =
+                    '<span>0</span>' +
+                    '<span>25</span>' +
+                    '<span>50</span>' +
+                    '<span>75</span>' +
+                    '<span>100</span>';
+                    container.appendChild(scaleEl);
+
+                    const legendEl = document.createElement('div');
+                    legendEl.style.cssText =
+                    'display: flex; gap: 24px; margin-top: 12px; ' +
+                    'font-family: var(--font-mono); font-size: 11px; color: var(--color-mid-gray)';
+                    legendEl.innerHTML =
+                    '<span style="display: flex; align-items: center; gap: 6px">' +
+                        '<span style="width: 10px; height: 10px; border-radius: 2px; ' +
+                        'background: var(--color-gold)"></span>Graphite</span>' +
+                    '<span style="display: flex; align-items: center; gap: 6px">' +
+                        '<span style="width: 10px; height: 10px; border-radius: 2px; ' +
+                        'background: ' + SUBSTITUTE_COLOR + '"></span>Substitute</span>';
+                    container.appendChild(legendEl);
+                }
+
+                /* efficiency card renderer */
+
+                function renderEfficiencyCards() {
+                    const container = document.getElementById('econ-cards-container');
+                    container.innerHTML = '';
+                
+                    DATA.efficiencyStats.forEach((stat, index) => {
+                        const card = document.createElement('div');
+                        card.className = 'econ-card';
+                    
+                        
+                        card.style.opacity   = '0';
+                        card.style.transform = 'scale(0.88)';
+                        card.style.transition =
+                        'all 0.6s cubic-bezier(0.16, 1, 0.3, 1) ' + (index * 0.1) + 's';
+                        
+                    
+                        card.innerHTML =
+                            '<div class="econ-card-number">' + stat.number + '</div>' +
+                            '<div class="econ-card-text">' + stat.label + '</div>' +
+                            '<div class="econ-card-source data-caption">' + stat.source + '</div>';
+                    
+                        container.appendChild(card);
+                    
+                        
+                        requestAnimationFrame(() => {
+                            setTimeout(() => {
+                                card.style.opacity   = '1';
+                                card.style.transform = 'scale(1)';
+                            }, 80);
+                        });
+                    });
+                }
+            }
+        )
+    </script>
+</body>
+</html>
